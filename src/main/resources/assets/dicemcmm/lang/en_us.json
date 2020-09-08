@@ -1,0 +1,24 @@
+{
+	"item.dicemcmm.moneybag":"MoneyBag",
+	
+	"itemGroup.dicemcmm":"Money Mod",
+	
+	"message.commandrootbalance":"Balance $",
+	"message.commandwithdrawsuccess":"MoneyBag given at value of $",
+	"message.commandwithdrawfail":"Insufficient Money in Account.",
+	"message.commanddepositduccess":"transferred from inventory to account.",
+	"message.commanddepositfail":"Insufficient monies in inventory.",
+	
+	"gui.balance":"My Balance: $",
+	"gui.transfer":"Transfer",
+	"gui.withdraw":"Withdraw",
+	"gui.deposit":"Deposit",
+	"gui.bagdump":"Bag Drop",
+	"gui.amount":"Amount $:",
+	"gui.namefield":"Player Name",
+	"gui.count":"Bag Count",
+	
+	"admin.add":"Add",
+	"admin.sub":"Sub",
+	"admin.set":"Set Balance"
+}

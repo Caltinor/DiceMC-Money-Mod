@@ -1,0 +1,30 @@
+modLoader="javafml" #mandatory
+loaderVersion="[32,)" #mandatory
+issueTrackerURL="https://github.com/caltinor" #optional
+displayURL="https://github.com/caltinor" #optional
+logoFile="" #optional
+credits="Thanks to the MMD community." #optional
+authors="Caltinor" #optional
+license="ARR License"
+
+[[mods]] #mandatory
+modId="dicemcmm" #mandatory
+version="1.0" #mandatory
+displayName="DiceMC Money Mod" #mandatory
+#updateJSONURL="http://myurl.me/"
+description='''
+A comprehensive money mod.
+'''
+
+[[dependencies.enderthing]] #optional
+    modId="forge" #mandatory
+    mandatory=true #mandatory
+    versionRange="[32.0.1,)" #mandatory
+    ordering="NONE"
+    side="BOTH"
+[[dependencies.enderthing]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.16.1,1.17)"
+    ordering="NONE"
+    side="BOTH"
