@@ -25,7 +25,7 @@ public class AccountManager implements IMoneyApi {
 
 		ResultSet rs =MoneyMod.dbm.executeSELECT(st);
 		try {
-			if (!rs.isBeforeFirst()) {addAccount(owner, ownerType);}
+			if (!rs.isBeforeFirst()) {return addAccount(owner, ownerType);}
 			if (rs.next()) {return rs.getDouble("balance");			
 		}
 		} catch (SQLException e) {e.printStackTrace();}

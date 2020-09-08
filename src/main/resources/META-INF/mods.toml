@@ -11,7 +11,7 @@ license="ARR License"
 modId="dicemcmm" #mandatory
 version="1.0" #mandatory
 displayName="DiceMC Money Mod" #mandatory
-#updateJSONURL="http://myurl.me/"
+#updateJSONURL=""
 description='''
 A comprehensive money mod.
 '''

@@ -81,7 +81,7 @@ public class PacketAdminToServer {
 			st.setString(1, MoneyMod.playerAccounts.toString());
 		} catch (SQLException e1) {e1.printStackTrace();}
 		ResultSet rs = MoneyMod.dbm.executeSELECT(st);
-		Map<String, Double> map = new HashMap<String, Double>();
+		Map<String, Double> map = new HashMap<String, Double>(); //TODO update to TreeMap and LinkedHashMap for sorting
 		try {
 			if (!rs.isBeforeFirst()) return map;
 			while (rs.next()) {

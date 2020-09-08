@@ -22,6 +22,7 @@ public class AccountCommandRoot implements Command<CommandSource>{
 				.then(AccountCommandWithdraw.register(dispatcher))
 				.then(AccountCommandGui.register(dispatcher))
 				.then(AccountCommandAdmin.register(dispatcher))
+				.then(AccountCommandTransfer.register(dispatcher))
 				.executes(CMD));
 		
 		dispatcher.register(Commands.literal("acct").redirect(cmdSRC));
