@@ -3,12 +3,12 @@
 	
 	"itemGroup.dicemcmm":"Money Mod",
 	
-	"message.commandrootbalance":"Balance $",
-	"message.commandwithdrawsuccess":"MoneyBag given at value of $",
+	"message.commandrootbalance":"Balance $%s",
+	"message.commandwithdrawsuccess":"MoneyBag given at value of $%s",
 	"message.commandwithdrawfail":"Insufficient Money in Account.",
-	"message.commanddepositduccess":"transferred from inventory to account.",
+	"message.commanddepositsuccess":"transferred $%s from inventory to account.",
 	"message.commanddepositfail":"Insufficient monies in inventory.",
-	"message.commandtransfersuccess":" transferred to ",
+	"message.commandtransfersuccess":"$%s transferred to %s",
 	"message.commandfailed":"Command Failed",
 	
 	"gui.balance":"My Balance: $",
@@ -19,6 +19,8 @@
 	"gui.amount":"Amount $:",
 	"gui.namefield":"Player Name",
 	"gui.count":"Bag Count",
+	
+	"guiinventory.tip":"Press 'A' to open account menu.",
 	
 	"admin.add":"Add",
 	"admin.sub":"Sub",

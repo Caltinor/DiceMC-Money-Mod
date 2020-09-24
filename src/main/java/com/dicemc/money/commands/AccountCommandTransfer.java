@@ -38,11 +38,7 @@ private static final AccountCommandTransfer CMD = new AccountCommandTransfer();
 		if (value <= MoneyMod.AcctProvider.getBalance(player.getUniqueID(), MoneyMod.playerAccounts) && exists) {
 			MoneyMod.AcctProvider.changeBalance(player.getUniqueID(), MoneyMod.playerAccounts, (-1 * value));
 			MoneyMod.AcctProvider.changeBalance(recipient, MoneyMod.playerAccounts, (value));
-			TextComponent text = new StringTextComponent("$");
-			text.append(new StringTextComponent(String.valueOf(value)));
-			text.append(new TranslationTextComponent("message.commandtransfersuccess"));
-			text.appendString(StringArgumentType.getString(context, "recipient"));
-			context.getSource().sendFeedback(text, false);
+			context.getSource().sendFeedback(new TranslationTextComponent("message.commandtransfersuccess", String.valueOf(value), StringArgumentType.getString(context, "recipient")), false);
 		}
 		else context.getSource().sendFeedback(new TranslationTextComponent("message.commandfailed"), false);
 		return 0;

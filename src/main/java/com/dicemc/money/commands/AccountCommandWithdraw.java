@@ -26,10 +26,9 @@ public class AccountCommandWithdraw implements Command<CommandSource>{
 	public static ArgumentBuilder<CommandSource, ?> register(CommandDispatcher<CommandSource> dispatcher) {
 		return Commands.literal("withdraw")
 				.then(Commands.argument("value", DoubleArgumentType.doubleArg(0d))
-						.executes(CMD))
+						.executes(CMD)
 						.then(Commands.argument("count", IntegerArgumentType.integer(1))
-								.executes(CMD));
-
+								.executes(CMD)));
 	}
 
 	@Override
@@ -46,9 +45,7 @@ public class AccountCommandWithdraw implements Command<CommandSource>{
 			nbt.putDouble("value", value);
 			bag.setTag(nbt);
 			player.addItemStackToInventory(bag);
-			TextComponent text = new TranslationTextComponent("message.commandwithdrawsuccess");
-			text.append(new StringTextComponent(String.valueOf(value)));
-			context.getSource().sendFeedback(text, false);
+			context.getSource().sendFeedback(new TranslationTextComponent("message.commandwithdrawsuccess", String.valueOf(value)), false);
 		}
 		else context.getSource().sendFeedback(new TranslationTextComponent("message.commandwithdrawfail"), false);
 		return 0;

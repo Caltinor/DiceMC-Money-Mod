@@ -72,9 +72,7 @@ public class AccountCommandDeposit implements Command<CommandSource>{
 		else context.getSource().sendFeedback(new TranslationTextComponent("message.commanddepositfail"), false);
 		MoneyMod.AcctProvider.changeBalance(context.getSource().asPlayer().getUniqueID(), MoneyMod.playerAccounts, toAccount);
 		DecimalFormat df = new DecimalFormat("###,###,###,##0.00");
-		TextComponent text = new StringTextComponent("$"+df.format(value));
-		text.append(new TranslationTextComponent("message.commandwithdrawsuccess"));
-		context.getSource().sendFeedback(text, false);
+		context.getSource().sendFeedback(new TranslationTextComponent("message.commanddepositsuccess", df.format(toAccount)), false);
 		return 0;
 	}
 	
