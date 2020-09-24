@@ -18,7 +18,7 @@ repositories {
     }
 }
 
-version = '1.0'
+version = '1.1'
 group = 'com.dicemc.money' 
 archivesBaseName = 'DiceMC Money'
 
@@ -26,7 +26,7 @@ sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = co
 
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
 minecraft {
-    mappings channel: 'snapshot', version: '20200820-1.16.1'
+    mappings channel: 'snapshot', version: '20200916-1.16.2'
 
     runs {
         client {
@@ -66,7 +66,7 @@ minecraft {
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.16.2-33.0.22'
+    minecraft 'net.minecraftforge:forge:1.16.3-34.1.0'
     compile files("C:/MinecraftModding/1-16-2/h2-1.4.200.jar")
 }
 
