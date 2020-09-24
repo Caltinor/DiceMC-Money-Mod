@@ -131,7 +131,7 @@ public class GuiAccountManager extends ContainerScreen<ContainerAccountManager>{
 		if (amountField.getText().length() > 0 && nameField.getText().length() > 0) {
 			double amount = 0;
 			try {amount = Math.abs(Double.valueOf(amountField.getText()));} catch (NumberFormatException e) {}
-			if (amount > 0) Networking.sendToServer(new PacketAccountToServer(PkType.WITHDRAW, amount, nameField.getText()));
+			if (amount > 0) Networking.sendToServer(new PacketAccountToServer(PkType.TRANSFER, amount, nameField.getText()));
 		}
 	}
 	

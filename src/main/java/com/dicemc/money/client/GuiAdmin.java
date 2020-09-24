@@ -160,7 +160,7 @@ public class GuiAdmin extends Screen{
                 ITextComponent chat = ForgeHooks.newChatWithLinks(line, false);
                 int maxTextLength = this.width - 12;
                 if (maxTextLength >= 0) {
-                    ret.addAll(font.func_238420_b_().func_238362_b_(chat, maxTextLength, Style.EMPTY));
+                    ret.addAll(font.getCharacterManager().func_238362_b_(chat, maxTextLength, Style.EMPTY));
                 }
             }
             return ret;
@@ -212,7 +212,7 @@ public class GuiAdmin extends Screen{
             selectedItem = lineIdx-1;
             if (line != null)
             {
-                return font.func_238420_b_().func_238357_a_(line, mouseX);
+                return font.getCharacterManager().func_238357_a_(line, mouseX);
             }
             return null;
         }

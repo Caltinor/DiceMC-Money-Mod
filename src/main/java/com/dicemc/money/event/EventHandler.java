@@ -1,7 +1,6 @@
 package com.dicemc.money.event;
 
 import com.dicemc.money.MoneyMod;
-
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
