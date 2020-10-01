@@ -12,12 +12,11 @@ import com.dicemc.money.setup.Config;
 public class DatabaseManager {
 	public Connection con;
 	
-	public DatabaseManager() {
+	public DatabaseManager(String saveName, String urlIn) {
 		String port = Config.DB_PORT.get();
-		String name = Config.DB_NAME.get();
-		String url  = Config.DB_URL.get();
+		String name = saveName + Config.DB_NAME.get();
 		String service = Config.DB_SERVICE.get();
-		String host = "jdbc:"+service+":" + url + port + name;;
+		String host = "jdbc:"+service+":" + urlIn + port + name;;
 		String user = Config.DB_USER.get();
 		String pass = Config.DB_PASS.get();
 

@@ -4,19 +4,15 @@ import com.dicemc.money.MoneyMod;
 import com.dicemc.money.api.MoneyApi;
 import com.dicemc.money.commands.AccountCommandRoot;
 import com.dicemc.money.core.AccountManager;
-import com.dicemc.money.item.MoneybagCombineRecipe;
 import com.dicemc.money.storage.DatabaseManager;
 
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipeSerializer;
-import net.minecraft.item.crafting.SpecialRecipeSerializer;
 import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.event.server.FMLServerAboutToStartEvent;
+import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 
 @Mod.EventBusSubscriber(modid = MoneyMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class CommonSetup {
@@ -40,7 +36,20 @@ public class CommonSetup {
 	}
 	
 	@SubscribeEvent
-	public static void onServerStart(FMLServerAboutToStartEvent event) {
-		MoneyMod.dbm = new DatabaseManager();
+	public static void onServerStart(FMLServerStartingEvent event) {
+		String worldname = getWorldName(event.getServer().func_241755_D_().toString());
+		System.out.println(worldname);
+		String urlIn = Config.DB_LOCAL.get() 
+				? event.getServer().getDataDirectory().getAbsolutePath() + "\\saves\\" + worldname +"\\"
+				: Config.DB_URL.get();
+		MoneyMod.dbm = new DatabaseManager(worldname, urlIn);
+	}
+	
+	private static String getWorldName(String raw) {
+		int start = raw.indexOf("[")+1;
+		int end = raw.length()-1;
+		start = (start >= 0 && start < end) ? start : 0;
+		end = (end >= 0) ? end : 0;
+		return raw.substring(start, end);
 	}
 }

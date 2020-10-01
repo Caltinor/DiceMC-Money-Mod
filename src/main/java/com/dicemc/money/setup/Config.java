@@ -15,6 +15,7 @@ public class Config {
 	//Data Storage Scheme Variables
 	public static ForgeConfigSpec.ConfigValue<Boolean> SETTING;
 	//Primary Database config values
+	public static ForgeConfigSpec.ConfigValue<Boolean> DB_LOCAL;
 	public static ForgeConfigSpec.ConfigValue<String> DB_PORT;
 	public static ForgeConfigSpec.ConfigValue<String> DB_NAME;
 	public static ForgeConfigSpec.ConfigValue<String> DB_SERVICE;
@@ -53,6 +54,8 @@ public class Config {
 		builder.comment("Server Settings").push(SUB_CATEGORY_SERVER);
 		
 		//Database location
+		DB_LOCAL = builder.comment("Set to false if connecting to a database server")
+				.define("local", true);
 		DB_PORT = builder.comment("Database port")
 				.define("port", "");
 		DB_NAME = builder.comment("Database name")
