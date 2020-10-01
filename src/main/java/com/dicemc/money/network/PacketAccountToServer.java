@@ -23,7 +23,7 @@ public class PacketAccountToServer {
 	public enum PkType {
 		DEPOSIT ((packet, ctx) -> {
 			MoneyMod.AcctProvider.changeBalance(ctx.get().getSender().getUniqueID(), MoneyMod.playerAccounts, packet.value);
-			for (int i = 0; i < ctx.get().getSender().openContainer.getInventory().size(); i++) {
+			for (int i = 0; i < 9; i++) {
 				ctx.get().getSender().openContainer.getInventory().get(i).setCount(0);
 			}
 			ctx.get().getSender().openContainer.detectAndSendChanges();
@@ -86,7 +86,6 @@ public class PacketAccountToServer {
 	}
 	
 	public void toBytes(PacketBuffer buf) {
-		System.out.println("Packets!!");
 		buf.writeVarInt(action.ordinal());
 		buf.writeDouble(value);
 		buf.writeInt(count);

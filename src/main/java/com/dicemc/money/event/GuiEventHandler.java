@@ -6,13 +6,11 @@ import net.minecraft.client.gui.screen.inventory.InventoryScreen;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 
-@OnlyIn(Dist.CLIENT)
-@EventBusSubscriber
+@EventBusSubscriber(value = Dist.CLIENT)
 public class GuiEventHandler {
 	@SuppressWarnings({ "static-access", "resource" })
 	@SubscribeEvent

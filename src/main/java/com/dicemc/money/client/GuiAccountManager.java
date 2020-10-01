@@ -107,7 +107,7 @@ public class GuiAccountManager extends ContainerScreen<ContainerAccountManager>{
 	
 	private void actionDeposit() {
 		double amount = 0d;
-		for (int i = 0; i < this.container.inv.getSizeInventory(); i++) {
+		for (int i = 0; i < 9; i++) {
 			if (this.container.inv.getStackInSlot(i).getItem() instanceof MoneyBag) {
 				amount += (this.container.inv.getStackInSlot(i).getTag().getDouble("value") * this.container.inv.getStackInSlot(i).getCount());
 				this.container.inv.getStackInSlot(i).setCount(0);
