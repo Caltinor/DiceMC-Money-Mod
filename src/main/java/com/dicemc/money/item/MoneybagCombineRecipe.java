@@ -22,15 +22,13 @@ public class MoneybagCombineRecipe extends SpecialRecipe {
 	@Override
 	public boolean matches(CraftingInventory inv, World worldIn) {
 		int bagcount = 0;
-		System.out.println("matches start");
 		for (int i = 0; i < inv.getSizeInventory(); i++) {			
 			ItemStack current = inv.getStackInSlot(i);
-	        if (current.isEmpty()) {System.out.println("Skipped empty"); continue;}
+	        if (current.isEmpty()) { continue;}
 	        Item item = current.getItem();
-			if (item instanceof MoneyBag) {bagcount++; System.out.println("bag detected"); continue;}	
-			else {System.out.println("returned false"); return false;}
+			if (item instanceof MoneyBag) {bagcount++; continue;}	
+			else { return false;}
 		}
-		System.out.println(bagcount);
 		return bagcount > 0;
 	}
 
@@ -42,7 +40,6 @@ public class MoneybagCombineRecipe extends SpecialRecipe {
 		}
 		ItemStack result = new ItemStack(ForgeRegistries.ITEMS.getValue(Registration.MONEYBAG.getId()));
 		result.setTagInfo("value", DoubleNBT.valueOf(valueSum));
-		System.out.println("craft result check");
 		return result;
 	}
 
