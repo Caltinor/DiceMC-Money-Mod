@@ -1,28 +1,21 @@
-{
-	"item.dicemcmm.moneybag":"MoneyBag",
-	
-	"itemGroup.dicemcmm":"Money Mod",
-	
-	"message.commandrootbalance":"Balance $%s",
-	"message.commandwithdrawsuccess":"MoneyBag given at value of $%s",
-	"message.commandwithdrawfail":"Insufficient Money in Account.",
-	"message.commanddepositsuccess":"transferred $%s from inventory to account.",
-	"message.commanddepositfail":"Insufficient monies in inventory.",
-	"message.commandtransfersuccess":"$%s transferred to %s",
+{	
+	"message.commandrootbalance":"Balance %s",
+	"message.command.transfer.success":"%s transferred to %s",
+	"message.command.transfer.failure":"unable to complete transfer",
 	"message.commandfailed":"Command Failed",
-	
-	"gui.balance":"My Balance: $",
-	"gui.transfer":"Transfer",
-	"gui.withdraw":"Withdraw",
-	"gui.deposit":"Deposit",
-	"gui.bagdump":"Bag Drop",
-	"gui.amount":"Amount $:",
-	"gui.namefield":"Player Name",
-	"gui.count":"Bag Count",
-	
-	"guiinventory.tip":"Press 'A' to open account menu.",
-	
-	"admin.add":"Add",
-	"admin.sub":"Sub",
-	"admin.set":"Set Balance"
+	"message.command.playernotfound":"%s not found",
+	"message.command.set.success":"%s balance set to %s",
+	"message.command.set.failure":"failure setting balance",
+	"message.command.give.success":"%s added to %s's account",
+	"message.command.take.success":"%s removed from %s's account",
+	"message.command.change.failure":"error changing account balance",
+	"message.activate.failure.admin":"Server shops can only be activated by admins",
+	"message.shop.buy.failure.stock":"Shop out of stock",
+	"message.shop.buy.failure.funds":"Insufficient funds to buy",
+	"message.shop.buy.success":"You bought %sx %s for %s",
+	"message.shop.info":"[Shop] Receive %s by giving %s",
+	"message.shop.sell.failure.funds":"Vendor funds are insufficient",
+	"message.shop.sell.failure.stock":"You do not have enough to sell",
+	"message.shop.sell.failure.space":"Shop inventory is full and cannot accept items",
+	"message.shop.sell.success":"You received %s for %sx %s"
 }
