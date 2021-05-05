@@ -37,6 +37,15 @@ import net.minecraftforge.items.IItemHandler;
 
 @Mod.EventBusSubscriber( modid=MoneyMod.MOD_ID, bus=Mod.EventBusSubscriber.Bus.FORGE)
 public class EventHandler {
+	/* TODO FEATURES TO BE IMPLEMTENT
+	 * - Using book and quill to act as surrogate for items you don't have (for requests)
+	 * - Using all items in the inventory during shop setup to be able to sell "kits"
+	 * 		- Sum up identical items with different stack counts
+	 * 
+	 * LONG TERM GOALS
+	 * - Create a command to build a book and quill for items
+	 */
+	
 	public static Map<UUID, Long> timeSinceClick = new HashMap<>();
 	public static enum Shop {
 		BUY, SELL, SERVER_BUY, SERVER_SELL
