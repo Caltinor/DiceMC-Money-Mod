@@ -12,15 +12,15 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
-version = '1.2'
-group = 'com.dicemc.money' 
+version = '2.0.1'
+group = 'dicemc.money' 
 archivesBaseName = 'DiceMC Money'
 
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8' 
 
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
 minecraft {
-    mappings channel: 'snapshot', version: '20201028-1.16.3'
+    mappings channel: 'official', version: '1.16.5'
 
     runs {
         client {
@@ -60,8 +60,7 @@ minecraft {
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.16.3-34.1.0'
-    compile files("C:/MinecraftModding/1-16-2/h2-1.4.200.jar")
+    minecraft 'net.minecraftforge:forge:1.16.5-36.1.4'
 }
 
 jar {

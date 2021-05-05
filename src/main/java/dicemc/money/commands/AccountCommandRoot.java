@@ -1,39 +1,36 @@
-package com.dicemc.money.commands;
+package dicemc.money.commands;
 
-import com.dicemc.money.MoneyMod;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 
+import dicemc.money.MoneyMod.AcctTypes;
+import dicemc.money.setup.Config;
+import dicemc.money.storage.MoneyWSD;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.world.server.ServerWorld;
 
 public class AccountCommandRoot implements Command<CommandSource>{
 	private static final AccountCommandRoot CMD = new AccountCommandRoot();
 	
 	public static void register(CommandDispatcher<CommandSource> dispatcher) {
-		LiteralCommandNode<CommandSource> cmdSRC = dispatcher.register(Commands.literal("account")
-				.then(AccountCommandDeposit.register(dispatcher))
-				.then(AccountCommandWithdraw.register(dispatcher))
-				.then(AccountCommandGui.register(dispatcher))
+		LiteralCommandNode<CommandSource> cmdSRC = dispatcher.register(Commands.literal("money")
 				.then(AccountCommandAdmin.register(dispatcher))
 				.then(AccountCommandTransfer.register(dispatcher))
 				.executes(CMD));
 		
-		dispatcher.register(Commands.literal("acct").redirect(cmdSRC));
+		dispatcher.register(Commands.literal("account").redirect(cmdSRC));
 	}
 
 	@Override
 	public int run(CommandContext<CommandSource> context) throws CommandSyntaxException {
-		Double balP = MoneyMod.AcctProvider.getBalance(context.getSource().asPlayer().getUniqueID(), MoneyMod.playerAccounts);
-		TextComponent text = new TranslationTextComponent("message.commandrootbalance");
-		text.append(new StringTextComponent(String.valueOf(balP)));
-		context.getSource().sendFeedback(text, false);
+		ServerWorld world = context.getSource().getServer().overworld();		
+		Double balP = MoneyWSD.get(world).getBalance(AcctTypes.PLAYER.key, context.getSource().getEntityOrException().getUUID());
+		context.getSource().sendSuccess(new StringTextComponent(Config.CURRENCY_SYMBOL.get()+String.valueOf(balP)), false);
 		return 0;
 	}
 	

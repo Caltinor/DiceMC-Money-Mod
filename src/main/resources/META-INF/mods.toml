@@ -9,20 +9,20 @@ license="ARR License"
 
 [[mods]] #mandatory
 modId="dicemcmm" #mandatory
-version="1.2" #mandatory
-displayName="DiceMC Money Mod" #mandatory
+version="${file.jarVersion}"
+displayName="Money and Sign Shops"
 #updateJSONURL=""
 description='''
-A comprehensive money mod.
+A server side money mod with sign-shops.
 '''
 
-[[dependencies.enderthing]] #optional
+[[dependencies.dicemcmm]] #optional
     modId="forge" #mandatory
     mandatory=true #mandatory
     versionRange="[32.0.1,)" #mandatory
     ordering="NONE"
     side="BOTH"
-[[dependencies.enderthing]]
+[[dependencies.dicemcmm]]
     modId="minecraft"
     mandatory=true
     versionRange="[1.16.1,1.17)"
