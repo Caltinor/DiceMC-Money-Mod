@@ -12,10 +12,10 @@
 	"message.activate.failure.admin":"Server shops can only be activated by admins",
 	"message.shop.buy.failure.stock":"Shop out of stock",
 	"message.shop.buy.failure.funds":"Insufficient funds to buy",
-	"message.shop.buy.success":"You bought %sx %s for %s",
+	"message.shop.buy.success":"You bought %s for %s",
 	"message.shop.info":"[Shop] Receive %s by giving %s",
 	"message.shop.sell.failure.funds":"Vendor funds are insufficient",
 	"message.shop.sell.failure.stock":"You do not have enough to sell",
 	"message.shop.sell.failure.space":"Shop inventory is full and cannot accept items",
-	"message.shop.sell.success":"You received %s for %sx %s"
+	"message.shop.sell.success":"You received %s for %s"
 }
