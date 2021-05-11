@@ -1,6 +1,7 @@
 package dicemc.money;
 
 import dicemc.money.commands.AccountCommandRoot;
+import dicemc.money.commands.ShopCommandBuilder;
 import dicemc.money.setup.Config;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
@@ -31,6 +32,7 @@ public class MoneyMod {
 	@SubscribeEvent
 	public void onCommandRegister(RegisterCommandsEvent event) {
 		AccountCommandRoot.register(event.getDispatcher());
+		ShopCommandBuilder.register(event.getDispatcher());
 	}
 	
 	//This enum is just for the establishment of later types.
