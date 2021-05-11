@@ -221,11 +221,12 @@ public class EventHandler {
 				StringTextComponent newPrice = new StringTextComponent(Config.CURRENCY_SYMBOL.get()+String.valueOf(price));
 				newPrice.withStyle(TextFormatting.GOLD);
 				tile.setMessage(3, newPrice);
+				System.out.println(actionEntry.getContents());
 				switch (actionEntry.getContents()) {
-				case "[buy]": {tile.getTileData().putInt("shop-type", Shop.BUY.ordinal()); break;}
-				case "[sell]": {tile.getTileData().putInt("shop-type", Shop.SELL.ordinal());break;}
-				case "[server-buy]": {tile.getTileData().putInt("shop-type", Shop.SERVER_BUY.ordinal());break;}
-				case "[server-sell]": {tile.getTileData().putInt("shop-type", Shop.SERVER_SELL.ordinal());break;}
+				case "[buy]": {tile.getTileData().putString("shop-type", "buy"); break;}
+				case "[sell]": {tile.getTileData().putString("shop-type", "sell");break;}
+				case "[server-buy]": {tile.getTileData().putString("shop-type", "server-buy");break;}
+				case "[server-sell]": {tile.getTileData().putString("shop-type", "server-sell");break;}
 				default:}
 				tile.getTileData().putBoolean("shop-activated", true);
 				tile.getTileData().putUUID("owner", player.getUUID());
@@ -465,7 +466,7 @@ public class EventHandler {
 				player.inventory.add(transItems.get(i).copy());
 			}
 			player.sendMessage(new TranslationTextComponent("message.shop.buy.success"
-					, Config.CURRENCY_SYMBOL.get()+String.valueOf(value), getTransItemsDisplayString(transItems)
+					, getTransItemsDisplayString(transItems), Config.CURRENCY_SYMBOL.get()+String.valueOf(value)
 					), player.getUUID());
 			return;
 		}
@@ -499,7 +500,7 @@ public class EventHandler {
 				player.inventory.getItem(pSlots.getKey()).shrink(pSlots.getValue().getCount());
 			}
 			player.sendMessage(new TranslationTextComponent("message.shop.sell.success"
-					, getTransItemsDisplayString(transItems), Config.CURRENCY_SYMBOL.get()+String.valueOf(value)
+					, Config.CURRENCY_SYMBOL.get()+String.valueOf(value), getTransItemsDisplayString(transItems)
 					), player.getUUID());
 			return;
 		}
