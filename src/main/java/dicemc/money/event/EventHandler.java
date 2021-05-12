@@ -376,7 +376,7 @@ public class EventHandler {
 			return;
 		}
 		//================SELL=================================================================================
-		else if (action.equalsIgnoreCase("buy")) { //SELL
+		else if (action.equalsIgnoreCase("sell")) { //SELL
 			//First check the available funds and stock for trade
 			UUID shopOwner = nbt.getUUID("owner");
 			double balP = wsd.getBalance(AcctTypes.PLAYER.key, shopOwner);
