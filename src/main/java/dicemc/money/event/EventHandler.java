@@ -325,10 +325,10 @@ public class EventHandler {
 			transItems.add(ItemStack.of(itemsList.getCompound(i)));
 		}
 		//ItemStack transItem = ItemStack.of(nbt.getCompound("item"));
-		int action = nbt.getInt("shop-type");
+		int action = nbt.getStrinh("shop-type");
 		double value = nbt.getDouble("price");
 		//================BUY=================================================================================
-		if (action == Shop.BUY.ordinal()) { //BUY
+		if (action.equalsIgnoreCase("buy")) { //BUY
 			//First check the available funds and stock for trade
 			double balP = wsd.getBalance(AcctTypes.PLAYER.key, player.getUUID());
 			if (value > balP) {
@@ -376,7 +376,7 @@ public class EventHandler {
 			return;
 		}
 		//================SELL=================================================================================
-		else if (action == Shop.SELL.ordinal()) { //SELL
+		else if (action.equalsIgnoreCase("buy")) { //SELL
 			//First check the available funds and stock for trade
 			UUID shopOwner = nbt.getUUID("owner");
 			double balP = wsd.getBalance(AcctTypes.PLAYER.key, shopOwner);
@@ -454,7 +454,7 @@ public class EventHandler {
 			return;
 		}
 		//================SERVER BUY=================================================================================
-		else if (action == Shop.SERVER_BUY.ordinal()) { //SERVER BUY
+		else if (action.equalsIgnoreCase("server-buy")) { //SERVER BUY
 			//First check the available funds and stock for trade
 			double balP = wsd.getBalance(AcctTypes.PLAYER.key, player.getUUID());
 			if (value > balP) {
@@ -471,7 +471,7 @@ public class EventHandler {
 			return;
 		}
 		//================SERVER SELL=================================================================================
-		else if (action == Shop.SERVER_SELL.ordinal()) { //SERVER SELL
+		else if (action.equalsIgnoreCase("server-sell")) { //SERVER SELL
 			Map<Integer, ItemStack> slotMap = new HashMap<>();
 			for (int t = 0; t < transItems.size(); t++) {
 				int stackSize = transItems.get(t).getCount();
