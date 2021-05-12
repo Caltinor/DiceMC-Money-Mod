@@ -325,7 +325,7 @@ public class EventHandler {
 			transItems.add(ItemStack.of(itemsList.getCompound(i)));
 		}
 		//ItemStack transItem = ItemStack.of(nbt.getCompound("item"));
-		int action = nbt.getString("shop-type");
+		String action = nbt.getString("shop-type");
 		double value = nbt.getDouble("price");
 		//================BUY=================================================================================
 		if (action.equalsIgnoreCase("buy")) { //BUY
