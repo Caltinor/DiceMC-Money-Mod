@@ -10,6 +10,7 @@
 	"message.command.take.success":"%s removed from %s's account",
 	"message.command.change.failure":"error changing account balance",
 	"message.activate.failure.admin":"Server shops can only be activated by admins",
+	"message.activate.failure.money":"Price cannot contain symbols. use only numbers (decimal is acceptable)",
 	"message.shop.buy.failure.stock":"Shop out of stock",
 	"message.shop.buy.failure.funds":"Insufficient funds to buy",
 	"message.shop.buy.success":"You bought %s for %s",

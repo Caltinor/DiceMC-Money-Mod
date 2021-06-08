@@ -117,34 +117,6 @@ public class EventHandler {
 					PlayerEntity player = event.getPlayer();
 					event.setCanceled(!player.hasPermissions(Config.ADMIN_LEVEL.get()));
 				}
-				/*BlockPos shop = event.getPos();
-				if (event.getWorld().getBlockEntity(event.getPos().north()) != null 
-						&&event.getWorld().getBlockEntity(event.getPos().north()).getBlockState().getBlock() instanceof WallSignBlock 
-						&& !event.getWorld().getBlockEntity(event.getPos().north()).getTileData().isEmpty()
-						&& event.getWorld().getBlockEntity(event.getPos().north()).getTileData().getBoolean("shop-activated")) {
-					shop = event.getPos().north();
-				}
-				else if (event.getWorld().getBlockEntity(event.getPos().south()) != null
-						&& event.getWorld().getBlockEntity(event.getPos().south()).getBlockState().getBlock() instanceof WallSignBlock  
-						&& !event.getWorld().getBlockEntity(event.getPos().south()).getTileData().isEmpty()
-						&& event.getWorld().getBlockEntity(event.getPos().south()).getTileData().getBoolean("shop-activated")) {
-					shop = event.getPos().south();
-				}
-				else if (event.getWorld().getBlockEntity(event.getPos().east()) != null 
-						&& event.getWorld().getBlockEntity(event.getPos().east()).getBlockState().getBlock() instanceof WallSignBlock  
-						&& !event.getWorld().getBlockEntity(event.getPos().east()).getTileData().isEmpty()
-						&& event.getWorld().getBlockEntity(event.getPos().east()).getTileData().getBoolean("shop-activated")) {
-					shop = event.getPos().east();
-				}
-				else if (event.getWorld().getBlockEntity(event.getPos().west()) != null 
-						&& event.getWorld().getBlockEntity(event.getPos().west()).getBlockState().getBlock() instanceof WallSignBlock  
-						&& !event.getWorld().getBlockEntity(event.getPos().west()).getTileData().isEmpty()
-						&& event.getWorld().getBlockEntity(event.getPos().west()).getTileData().getBoolean("shop-activated")) {
-					shop = event.getPos().west();
-				}
-				if (!shop.equals(event.getPos()) && !event.getWorld().getBlockEntity(shop).getTileData().getUUID("owner").equals(player.getUUID())) {
-					
-				}*/
 			}
 		}
 	}
@@ -198,7 +170,13 @@ public class EventHandler {
 		ITextComponent priceEntry  = ITextComponent.Serializer.fromJson(nbt.getString("Text4"));
 		//check if the storage block has an item in the first slot
 		LazyOptional<IItemHandler> inv = storage.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, Direction.UP);
-		ItemStack srcStack = inv.map((c) -> c.getStackInSlot(0)).orElse(ItemStack.EMPTY);
+		ItemStack srcStack = inv.map((c) -> {
+			for (int i = 0; i < c.getSlots(); i++) {
+				if (c.getStackInSlot(i).isEmpty()) continue;
+				return c.getStackInSlot(i);
+			}	
+			return ItemStack.EMPTY;
+		}).orElse(ItemStack.EMPTY);
 		if (srcStack.equals(ItemStack.EMPTY, true)) return;
 		//first confirm the action type is valid
 		if (actionEntry.getContents().equalsIgnoreCase("[buy]")
@@ -252,6 +230,7 @@ public class EventHandler {
 				world.sendBlockUpdated(pos, state, state, BlockFlags.DEFAULT_AND_RERENDER);
 			}
 			catch(NumberFormatException e) {
+				player.sendMessage(new TranslationTextComponent("message.activate.failure.money"), player.getUUID());
 				world.destroyBlock(pos, true, player);
 			}
 		}

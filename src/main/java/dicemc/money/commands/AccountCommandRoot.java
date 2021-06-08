@@ -22,7 +22,7 @@ public class AccountCommandRoot implements Command<CommandSource>{
 				.then(AccountCommandAdmin.register(dispatcher))
 				.then(AccountCommandTransfer.register(dispatcher))
 				.executes(CMD));
-		
+		//TODO figure out why this doesn't work
 		dispatcher.register(Commands.literal("account").redirect(cmdSRC));
 	}
 
