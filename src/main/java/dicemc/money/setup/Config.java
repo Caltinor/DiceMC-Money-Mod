@@ -15,6 +15,7 @@ public class Config {
 	public static ForgeConfigSpec.ConfigValue<Double> STARTING_FUNDS;
 	public static ForgeConfigSpec.ConfigValue<String> CURRENCY_SYMBOL;
 	public static ForgeConfigSpec.ConfigValue<Integer> ADMIN_LEVEL;
+	public static ForgeConfigSpec.ConfigValue<Integer> SHOP_LEVEL;
 	
 	static {
 		ForgeConfigSpec.Builder SERVER_BUILDER = new ForgeConfigSpec.Builder();
@@ -35,6 +36,8 @@ public class Config {
 				.define("currency symbol", "$");
 		ADMIN_LEVEL = builder.comment("the op level permitted to use admin commands")
 				.defineInRange("admin level", 2, 1, 4, Integer.class);
+		SHOP_LEVEL = builder.comment("The minimum permission level to create basic shops.  default= 0 = all players")
+				.defineInRange("shop level", 0, 1, 4, Integer.class);
 		
 		builder.pop();		
 	}

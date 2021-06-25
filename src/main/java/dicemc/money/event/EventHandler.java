@@ -190,6 +190,10 @@ public class EventHandler {
 					return;
 				}
 			}
+			else if (!player.hasPermissions(Config.SHOP_LEVEL.get())) {
+				player.sendMessage(new TranslationTextComponent("message.activate.failure.admin"), player.getUUID());
+				return;
+			}
 			try {
 				double price = Math.abs(Double.valueOf(priceEntry.getString()));
 				tile.getTileData().putDouble("price", price);
