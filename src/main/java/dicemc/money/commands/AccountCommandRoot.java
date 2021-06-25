@@ -4,8 +4,6 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.tree.LiteralCommandNode;
-
 import dicemc.money.MoneyMod.AcctTypes;
 import dicemc.money.setup.Config;
 import dicemc.money.storage.MoneyWSD;
@@ -18,12 +16,10 @@ public class AccountCommandRoot implements Command<CommandSource>{
 	private static final AccountCommandRoot CMD = new AccountCommandRoot();
 	
 	public static void register(CommandDispatcher<CommandSource> dispatcher) {
-		LiteralCommandNode<CommandSource> cmdSRC = dispatcher.register(Commands.literal("money")
+		dispatcher.register(Commands.literal("money")
 				.then(AccountCommandAdmin.register(dispatcher))
 				.then(AccountCommandTransfer.register(dispatcher))
 				.executes(CMD));
-		//TODO figure out why this doesn't work
-		dispatcher.register(Commands.literal("account").redirect(cmdSRC));
 	}
 
 	@Override
