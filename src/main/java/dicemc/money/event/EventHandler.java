@@ -34,6 +34,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants.BlockFlags;
 import net.minecraftforge.common.util.Constants.NBT;
 import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.LeftClickBlock;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickBlock;
@@ -59,6 +60,20 @@ public class EventHandler {
 			String symbol = Config.CURRENCY_SYMBOL.get();
 			double balP = MoneyWSD.get(player.getServer().overworld()).getBalance(AcctTypes.PLAYER.key, player.getUUID());
 			player.sendMessage(new StringTextComponent(symbol+String.valueOf(balP)), player.getUUID());
+		}
+	}
+	
+	@SuppressWarnings("resource")
+	@SubscribeEvent
+	public static void onPlayerDeath(LivingDeathEvent event) {
+		if (!event.getEntityLiving().getCommandSenderWorld().isClientSide && event.getEntityLiving() instanceof PlayerEntity) {
+			PlayerEntity player = (PlayerEntity) event.getEntityLiving();
+			double balp = MoneyWSD.get(player.getServer().overworld()).getBalance(AcctTypes.PLAYER.key, player.getUUID());
+			double loss = balp * Config.LOSS_ON_DEATH.get();
+			if (loss > 0) {
+				MoneyWSD.get(player.getServer().overworld()).changeBalance(AcctTypes.PLAYER.key, player.getUUID(), -loss);
+				player.sendMessage(new TranslationTextComponent("message.death", loss), player.getUUID());
+			}
 		}
 	}
 	

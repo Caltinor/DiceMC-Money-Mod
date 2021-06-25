@@ -18,5 +18,6 @@
 	"message.shop.sell.failure.funds":"Vendor funds are insufficient",
 	"message.shop.sell.failure.stock":"You do not have enough to sell",
 	"message.shop.sell.failure.space":"Shop inventory is full and cannot accept items",
-	"message.shop.sell.success":"You received %s for %s"
+	"message.shop.sell.success":"You received %s for %s",
+	"message.death":"You lost %s from dying"
 }

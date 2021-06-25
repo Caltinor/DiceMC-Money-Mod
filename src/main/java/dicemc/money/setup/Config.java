@@ -16,6 +16,7 @@ public class Config {
 	public static ForgeConfigSpec.ConfigValue<String> CURRENCY_SYMBOL;
 	public static ForgeConfigSpec.ConfigValue<Integer> ADMIN_LEVEL;
 	public static ForgeConfigSpec.ConfigValue<Integer> SHOP_LEVEL;
+	public static ForgeConfigSpec.ConfigValue<Double> LOSS_ON_DEATH;
 	
 	static {
 		ForgeConfigSpec.Builder SERVER_BUILDER = new ForgeConfigSpec.Builder();
@@ -38,6 +39,8 @@ public class Config {
 				.defineInRange("admin level", 2, 1, 4, Integer.class);
 		SHOP_LEVEL = builder.comment("The minimum permission level to create basic shops.  default= 0 = all players")
 				.defineInRange("shop level", 0, 1, 4, Integer.class);
+		LOSS_ON_DEATH = builder.comment("a percentage of the player's account that is lost on death, in decimal form. default = 0%. 0.5 = 50%")
+				.defineInRange("loss on death", 0d, 0d, 1d);
 		
 		builder.pop();		
 	}
