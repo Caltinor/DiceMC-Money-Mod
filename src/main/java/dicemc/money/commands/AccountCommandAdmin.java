@@ -2,6 +2,7 @@ package dicemc.money.commands;
 
 import java.util.UUID;
 
+import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -14,7 +15,7 @@ import dicemc.money.setup.Config;
 import dicemc.money.storage.MoneyWSD;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.command.arguments.EntityArgument;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 
@@ -23,66 +24,93 @@ public class AccountCommandAdmin{
 	public static ArgumentBuilder<CommandSource, ?> register(CommandDispatcher<CommandSource> dispatcher) {
 		return Commands.literal("admin")
 				.requires((p) -> p.hasPermission(Config.ADMIN_LEVEL.get()))
-				.then(Commands.literal("balance")
-						.then(Commands.argument("player", StringArgumentType.word())
-							.executes((p) -> balance(p))))
-				.then(Commands.argument("action", StringArgumentType.word())
-						.suggests((c, b) -> b
-								.suggest("balance")
-								.suggest("set")
-								.suggest("give")
-								.suggest("take")
-								.buildFuture())
-						.then(Commands.argument("player", StringArgumentType.word())
-								.executes((p) -> process(p))
-								.then(Commands.argument("amount", DoubleArgumentType.doubleArg(0d))
-									.executes((p) -> process(p)))))
-				.then(Commands.literal("transfer")
-						.then(Commands.argument("amount", DoubleArgumentType.doubleArg(0))
-								.then(Commands.argument("from", StringArgumentType.word())
-										.then(Commands.argument("to", StringArgumentType.word())
-											.executes((p) -> transfer(p))))))	;
+				.then(Commands.literal("byName")
+					.then(Commands.literal("balance")
+							.then(Commands.argument("player", StringArgumentType.word())
+								.executes((p) -> balance(p))))
+					.then(Commands.argument("action", StringArgumentType.word())
+							.suggests((c, b) -> b
+									.suggest("set")
+									.suggest("give")
+									.suggest("take")
+									.buildFuture())
+							.then(Commands.argument("player", StringArgumentType.word())
+									.executes((p) -> process(p))
+									.then(Commands.argument("amount", DoubleArgumentType.doubleArg(0d))
+										.executes((p) -> process(p)))))
+					.then(Commands.literal("transfer")
+							.then(Commands.argument("amount", DoubleArgumentType.doubleArg(0))
+									.then(Commands.argument("from", StringArgumentType.word())
+											.then(Commands.argument("to", StringArgumentType.word())
+												.executes((p) -> transfer(p)))))))
+				.then(Commands.literal("online")
+						.then(Commands.literal("balance")
+								.then(Commands.argument("player", EntityArgument.player())
+									.executes((p) -> balance(p))))
+						.then(Commands.argument("action", StringArgumentType.word())
+								.suggests((c, b) -> b
+										.suggest("set")
+										.suggest("give")
+										.suggest("take")
+										.buildFuture())
+								.then(Commands.argument("player", EntityArgument.player())
+										.executes((p) -> process(p))
+										.then(Commands.argument("amount", DoubleArgumentType.doubleArg(0d))
+											.executes((p) -> process(p)))))
+						.then(Commands.literal("transfer")
+								.then(Commands.argument("amount", DoubleArgumentType.doubleArg(0))
+										.then(Commands.argument("from", EntityArgument.player())
+												.then(Commands.argument("to", EntityArgument.player())
+													.executes((p) -> transfer(p)))))));
 
 	}
 	
 	public static int process(CommandContext<CommandSource> context) throws CommandSyntaxException {
+		//get the argument that is actually present
+		GameProfile player = null;
+		try {player = context.getSource().getServer().getProfileCache().get(StringArgumentType.getString(context, "player"));}
+		catch (IllegalArgumentException e) {}
+		if (player == null) { try { 
+			player = EntityArgument.getPlayer(context, "player").getGameProfile();}
+			catch (IllegalArgumentException e) {}
+		}
+		//rest of logic
 		MoneyWSD wsd = MoneyWSD.get(context.getSource().getServer().overworld());
-		MinecraftServer server = context.getSource().getServer();
 		String option = StringArgumentType.getString(context, "action");
-		String target = StringArgumentType.getString(context, "player");
+		//GameProfile player = EntityArgument.getPlayer(context, "player").getGameProfile();
+		UUID pid = player.getId();
 		String symbol = Config.CURRENCY_SYMBOL.get();
 		double value = DoubleArgumentType.getDouble(context, "amount");
-		UUID player = server.getProfileCache().get(target).getId();
-		if (player == null) {
-			context.getSource().sendFailure(new TranslationTextComponent("message.command.playernotfound", target));
+		if (pid == null) {
+			context.getSource().sendFailure(new TranslationTextComponent("message.command.playernotfound"));
 			return 1;
 		}
 		switch (option) {
 		case "set": {
-			boolean result = wsd.setBalance(AcctTypes.PLAYER.key, player, value);
+			boolean result = wsd.setBalance(AcctTypes.PLAYER.key, pid, value);
 			if (result) {
 				context.getSource().sendSuccess(
-					new TranslationTextComponent("message.command.set.success", target, symbol+String.valueOf(value)), true);
+					new TranslationTextComponent("message.command.set.success", player.getName(), symbol+String.valueOf(value)), true);
 				return 0;
 			}
 			context.getSource().sendFailure(new TranslationTextComponent("message.command.set.failure"));
 			return 1;
 		}
 		case "give": {
-			boolean result = wsd.changeBalance(AcctTypes.PLAYER.key, player, value);
+			boolean result = wsd.changeBalance(AcctTypes.PLAYER.key, pid, value);
 			if (result) {
 				context.getSource().sendSuccess(
-					new TranslationTextComponent("message.command.give.success", symbol+String.valueOf(value), target), true);
+					new TranslationTextComponent("message.command.give.success", symbol+String.valueOf(value), player.getName()), true);
 				return 0;
 			}
 			context.getSource().sendFailure(new TranslationTextComponent("message.command.change.failure"));
 			return 1;
 		}
 		case "take": {
-			boolean result = wsd.changeBalance(AcctTypes.PLAYER.key, player, -value);
+			boolean result = wsd.changeBalance(AcctTypes.PLAYER.key, pid, -value);
 			if (result) {
 				context.getSource().sendSuccess(
-					new TranslationTextComponent("message.command.take.success", symbol+String.valueOf(value), target), true);
+					new TranslationTextComponent("message.command.take.success", symbol+String.valueOf(value), player.getName()), true);
 				return 0;
 			}
 			context.getSource().sendFailure(new TranslationTextComponent("message.command.change.failure"));
@@ -93,41 +121,54 @@ public class AccountCommandAdmin{
 	}
 	
 	public static int balance(CommandContext<CommandSource> context) throws CommandSyntaxException {
+		//get the argument that is actually present
+		GameProfile player = null;
+		try {player = context.getSource().getServer().getProfileCache().get(StringArgumentType.getString(context, "player"));}
+		catch (IllegalArgumentException e) {}
+		if (player == null) { try { 
+			player = EntityArgument.getPlayer(context, "player").getGameProfile();}
+			catch (IllegalArgumentException e) {}
+		}
+		//rest of logic
 		MoneyWSD wsd = MoneyWSD.get(context.getSource().getServer().overworld());
-		MinecraftServer server = context.getSource().getServer();
-		String target = StringArgumentType.getString(context, "player");
 		String symbol = Config.CURRENCY_SYMBOL.get();
-		UUID player = server.getProfileCache().get(target).getId();
 		if (player == null) {
-			context.getSource().sendFailure(new TranslationTextComponent("message.command.playernotfound", target));
+			context.getSource().sendFailure(new TranslationTextComponent("message.command.playernotfound"));
 			return 1;
 		}
-		double balP = wsd.getBalance(AcctTypes.PLAYER.key, player); 
+		double balP = wsd.getBalance(AcctTypes.PLAYER.key, player.getId()); 
 		context.getSource().sendSuccess(new StringTextComponent(symbol+String.valueOf(balP)), true);		
 		return 0;
 	}
 	
 	public static int transfer(CommandContext<CommandSource> context) throws CommandSyntaxException {
+		//get the argument that is actually present
+		GameProfile fromplayer = null;
+		GameProfile toplayer = null;
+		try {fromplayer = context.getSource().getServer().getProfileCache().get(StringArgumentType.getString(context, "from"));
+			toplayer = context.getSource().getServer().getProfileCache().get(StringArgumentType.getString(context, "to"));
+		} catch (IllegalArgumentException e) {}
+		if (fromplayer == null && toplayer == null) { try { 
+			fromplayer = EntityArgument.getPlayer(context, "from").getGameProfile();
+			toplayer = EntityArgument.getPlayer(context, "to").getGameProfile();}
+			catch (IllegalArgumentException e) {}
+		}
+		//rest of logic
 		MoneyWSD wsd = MoneyWSD.get(context.getSource().getServer().overworld());
-		MinecraftServer server = context.getSource().getServer();
-		String from = StringArgumentType.getString(context, "from");
-		String to = StringArgumentType.getString(context, "to");
 		String symbol = Config.CURRENCY_SYMBOL.get();
 		double value = DoubleArgumentType.getDouble(context, "amount");
-		UUID fromplayer = server.getProfileCache().get(from).getId();
 		if (fromplayer == null) {
-			context.getSource().sendFailure(new TranslationTextComponent("message.command.playernotfound", from));
+			context.getSource().sendFailure(new TranslationTextComponent("message.command.playernotfound"));
 			return 1;
 		}
-		UUID toplayer = server.getProfileCache().get(to).getId();
 		if (toplayer == null) {
-			context.getSource().sendFailure(new TranslationTextComponent("message.command.playernotfound", to));
+			context.getSource().sendFailure(new TranslationTextComponent("message.command.playernotfound"));
 			return 1;
 		}
-		boolean result = wsd.transferFunds(AcctTypes.PLAYER.key, fromplayer, AcctTypes.PLAYER.key, toplayer, value);
+		boolean result = wsd.transferFunds(AcctTypes.PLAYER.key, fromplayer.getId(), AcctTypes.PLAYER.key, toplayer.getId(), value);
 		if (result) {
 			context.getSource().sendSuccess(
-				new TranslationTextComponent("message.command.transfer.success", symbol+String.valueOf(value), to), true);
+				new TranslationTextComponent("message.command.transfer.success", symbol+String.valueOf(value), toplayer.getName()), true);
 			return 0;
 		}
 		context.getSource().sendFailure(new TranslationTextComponent("message.command.transfer.failure"));
