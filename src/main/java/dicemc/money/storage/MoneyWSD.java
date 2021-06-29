@@ -21,6 +21,8 @@ public class MoneyWSD extends WorldSavedData implements IMoneyManager{
 	
 	private Map<ResourceLocation, Map<UUID, Double>> accounts = new HashMap<>();
 	
+	public Map<UUID, Double> getAccountMap(ResourceLocation res) {return accounts.getOrDefault(res, new HashMap<>());}
+	
 	@Override
 	public double getBalance(ResourceLocation type, UUID owner) {
 		accountChecker(type, owner);

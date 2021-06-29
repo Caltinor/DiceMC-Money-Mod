@@ -3,7 +3,7 @@
 	"message.command.transfer.success":"%s transferred to %s",
 	"message.command.transfer.failure":"unable to complete transfer",
 	"message.commandfailed":"Command Failed",
-	"message.command.playernotfound":"%s not found",
+	"message.command.playernotfound":"Player not found",
 	"message.command.set.success":"%s balance set to %s",
 	"message.command.set.failure":"failure setting balance",
 	"message.command.give.success":"%s added to %s's account",
@@ -19,5 +19,7 @@
 	"message.shop.sell.failure.stock":"You do not have enough to sell",
 	"message.shop.sell.failure.space":"Shop inventory is full and cannot accept items",
 	"message.shop.sell.success":"You received %s for %s",
-	"message.death":"You lost %s from dying"
+	"message.death":"You lost %s from dying",
+	"message.command.top":"Top %s wealthiest players:",
+	"message.command.top1":"The wealthiest player:"
 }
