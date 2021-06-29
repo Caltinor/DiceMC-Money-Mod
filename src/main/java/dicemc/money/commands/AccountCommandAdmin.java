@@ -20,7 +20,7 @@ import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 
 public class AccountCommandAdmin{
-	
+	//TODO add in a looper to accept multiple players as arguments and apply the command to all of them
 	public static ArgumentBuilder<CommandSource, ?> register(CommandDispatcher<CommandSource> dispatcher) {
 		return Commands.literal("admin")
 				.requires((p) -> p.hasPermission(Config.ADMIN_LEVEL.get()))

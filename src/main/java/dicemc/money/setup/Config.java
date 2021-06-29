@@ -37,9 +37,9 @@ public class Config {
 		CURRENCY_SYMBOL = builder.comment("the character(s) to precede money values when displayed")
 				.define("currency symbol", "$");
 		ADMIN_LEVEL = builder.comment("the op level permitted to use admin commands")
-				.defineInRange("admin level", 2, 1, 4, Integer.class);
+				.defineInRange("admin level", 2, 0, 4, Integer.class);
 		SHOP_LEVEL = builder.comment("The minimum permission level to create basic shops.  default= 0 = all players")
-				.defineInRange("shop level", 0, 1, 4, Integer.class);
+				.defineInRange("shop level", 0, 0, 4, Integer.class);
 		LOSS_ON_DEATH = builder.comment("a percentage of the player's account that is lost on death, in decimal form. default = 0%. 0.5 = 50%")
 				.defineInRange("loss on death", 0d, 0d, 1d);
 		TOP_SIZE = builder.comment("The number of players to be displayed when the top command is used.  set to zero to disable")

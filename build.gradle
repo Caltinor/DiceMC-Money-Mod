@@ -12,7 +12,7 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
-version = '2.0.7'
+version = '2.0.7a'
 group = 'dicemc.money' 
 archivesBaseName = 'DiceMC Money'
 
