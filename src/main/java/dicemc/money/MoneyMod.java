@@ -1,5 +1,6 @@
 package dicemc.money;
 
+import dicemc.money.FTBQuests.FTBQHandler;
 import dicemc.money.commands.AccountCommandRoot;
 import dicemc.money.commands.AccountCommandTop;
 import dicemc.money.commands.ShopCommandBuilder;
@@ -8,6 +9,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
@@ -22,6 +24,11 @@ public class MoneyMod {
 		ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, Config.SERVER_CONFIG);		
 		
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::commonSetup);
+		
+		if( ModList.get().isLoaded( "ftbquests" ) )
+        {
+            FTBQHandler.init();
+        }
 		
 		MinecraftForge.EVENT_BUS.register(this);
 	}

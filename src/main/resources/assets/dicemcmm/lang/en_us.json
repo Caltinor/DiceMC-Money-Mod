@@ -21,5 +21,8 @@
 	"message.shop.sell.success":"You received %s for %s",
 	"message.death":"You lost %s from dying",
 	"message.command.top":"Top %s wealthiest players:",
-	"message.command.top1":"The wealthiest player:"
+	"message.command.top1":"The wealthiest player:",
+		
+	"ftbquests.reward.dicemcmm.moneyreward":"Money Reward",
+	"ftbquests.reward.dicemcmm.moneyreward.amount":"Amount to be awarded"
 }
