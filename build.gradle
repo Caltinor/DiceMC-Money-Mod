@@ -3,14 +3,22 @@ buildscript {
         maven { url = 'https://files.minecraftforge.net/maven' }
         jcenter()
         mavenCentral()
+        maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
     }
     dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '4.1.+', changing: true
+        classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
     }
 }
 apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
+
+repositories {
+    maven {
+        url "https://www.cursemaven.com"
+    }
+}
 
 version = '2.0.7a'
 group = 'dicemc.money' 
@@ -27,6 +35,8 @@ minecraft {
             workingDirectory project.file('run')
             //property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
             property 'forge.logging.console.level', 'debug'
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
             mods {
                 examplemod {
                     source sourceSets.main
@@ -60,7 +70,18 @@ minecraft {
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.16.5-36.1.4'
+    minecraft 'net.minecraftforge:forge:1.16.5-36.2.0'
+    
+    compileOnly fg.deobf("curse.maven:ftbquests-289412:3385407")
+    runtimeOnly fg.deobf("curse.maven:ftbquests-289412:3385407")
+    compileOnly fg.deobf("curse.maven:ftbguilibrary-404465:3373833")
+    runtimeOnly fg.deobf("curse.maven:ftbguilibrary-404465:3373833")
+    compileOnly fg.deobf("curse.maven:itemfilters-309674:3376819")
+    runtimeOnly fg.deobf("curse.maven:itemfilters-309674:3376819")
+    compileOnly fg.deobf("curse.maven:ftbteams-forge-404468:3373835")
+    runtimeOnly fg.deobf("curse.maven:ftbteams-forge-404468:3373835")
+    compileOnly fg.deobf("curse.maven:architecturyforge-419699:3385660")
+    runtimeOnly fg.deobf("curse.maven:architecturyforge-419699:3385660")
 }
 
 jar {
