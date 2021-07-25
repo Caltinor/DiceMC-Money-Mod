@@ -7,17 +7,18 @@ import java.util.UUID;
 import dicemc.money.MoneyMod;
 import dicemc.money.api.IMoneyManager;
 import dicemc.money.setup.Config;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraft.world.storage.WorldSavedData;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraftforge.common.util.Constants.NBT;
 
-public class MoneyWSD extends WorldSavedData implements IMoneyManager{
+public class MoneyWSD extends SavedData implements IMoneyManager{
 	private static final String DATA_NAME = MoneyMod.MOD_ID + "_data";
 
-	public MoneyWSD() {super(DATA_NAME);}
+	public MoneyWSD(CompoundTag nbt) {this.load(nbt);}
+	public MoneyWSD() {}
 	
 	private Map<ResourceLocation, Map<UUID, Double>> accounts = new HashMap<>();
 	
@@ -74,16 +75,15 @@ public class MoneyWSD extends WorldSavedData implements IMoneyManager{
 		}
 	}
 
-	@Override
-	public void load(CompoundNBT nbt) {
-		ListNBT baseList = nbt.getList("types", NBT.TAG_COMPOUND);
+	public void load(CompoundTag nbt) {
+		ListTag baseList = nbt.getList("types", NBT.TAG_COMPOUND);
 		for (int b = 0; b < baseList.size(); b++) {
-			CompoundNBT entry = baseList.getCompound(b);
+			CompoundTag entry = baseList.getCompound(b);
 			ResourceLocation res = new ResourceLocation(entry.getString("type"));
 			Map<UUID, Double> data = new HashMap<>();
-			ListNBT list = entry.getList("data", NBT.TAG_COMPOUND);
+			ListTag list = entry.getList("data", NBT.TAG_COMPOUND);
 			for (int i = 0; i < list.size(); i++) {
-				CompoundNBT snbt = list.getCompound(i);
+				CompoundTag snbt = list.getCompound(i);
 				UUID id = snbt.getUUID("id");
 				double balance = snbt.getDouble("balance");
 				data.put(id, balance);
@@ -93,14 +93,14 @@ public class MoneyWSD extends WorldSavedData implements IMoneyManager{
 	}
 
 	@Override
-	public CompoundNBT save(CompoundNBT nbt) {
-		ListNBT baseList = new ListNBT();
+	public CompoundTag save(CompoundTag nbt) {
+		ListTag baseList = new ListTag();
 		for (Map.Entry<ResourceLocation, Map<UUID, Double>> base : accounts.entrySet()) {
-			CompoundNBT entry = new CompoundNBT();
-			ListNBT list = new ListNBT();
+			CompoundTag entry = new CompoundTag();
+			ListTag list = new ListTag();
 			entry.putString("type", base.getKey().toString());
 			for (Map.Entry<UUID, Double> data : base.getValue().entrySet()) {
-				CompoundNBT dataNBT = new CompoundNBT();
+				CompoundTag dataNBT = new CompoundTag();
 				dataNBT.putUUID("id", data.getKey());
 				dataNBT.putDouble("balance", data.getValue());
 				list.add(dataNBT);
@@ -112,7 +112,7 @@ public class MoneyWSD extends WorldSavedData implements IMoneyManager{
 		return nbt;
 	}
 	
-	public static MoneyWSD get(ServerWorld world) {
-		return world.getDataStorage().computeIfAbsent(MoneyWSD::new, DATA_NAME);
+	public static MoneyWSD get(ServerLevel world) {
+		return world.getDataStorage().computeIfAbsent(MoneyWSD::new, MoneyWSD::new, DATA_NAME);
 	}
 }

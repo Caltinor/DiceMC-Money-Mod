@@ -7,15 +7,15 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dicemc.money.MoneyMod.AcctTypes;
 import dicemc.money.setup.Config;
 import dicemc.money.storage.MoneyWSD;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.server.level.ServerLevel;
 
-public class AccountCommandRoot implements Command<CommandSource>{
+public class AccountCommandRoot implements Command<CommandSourceStack>{
 	private static final AccountCommandRoot CMD = new AccountCommandRoot();
 	
-	public static void register(CommandDispatcher<CommandSource> dispatcher) {
+	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
 		dispatcher.register(Commands.literal("money")
 				.then(AccountCommandAdmin.register(dispatcher))
 				.then(AccountCommandTransfer.register(dispatcher))
@@ -23,10 +23,10 @@ public class AccountCommandRoot implements Command<CommandSource>{
 	}
 
 	@Override
-	public int run(CommandContext<CommandSource> context) throws CommandSyntaxException {
-		ServerWorld world = context.getSource().getServer().overworld();		
+	public int run(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+		ServerLevel world = context.getSource().getServer().overworld();		
 		Double balP = MoneyWSD.get(world).getBalance(AcctTypes.PLAYER.key, context.getSource().getEntityOrException().getUUID());
-		context.getSource().sendSuccess(new StringTextComponent(Config.CURRENCY_SYMBOL.get()+String.valueOf(balP)), false);
+		context.getSource().sendSuccess(new TextComponent(Config.CURRENCY_SYMBOL.get()+String.valueOf(balP)), false);
 		return 0;
 	}
 	

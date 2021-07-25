@@ -6,13 +6,14 @@ buildscript {
         maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
     }
     dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '4.1.+', changing: true
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
         classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
     }
 }
 apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
+apply from: 'https://raw.githubusercontent.com/SizableShrimp/Forge-Class-Remapper/main/classremapper.gradle'
 
 repositories {
     maven {
@@ -24,11 +25,11 @@ version = '2.0.8'
 group = 'dicemc.money' 
 archivesBaseName = 'DiceMC Money'
 
-sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8' 
+java.toolchain.languageVersion = JavaLanguageVersion.of(16)
 
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
 minecraft {
-    mappings channel: 'official', version: '1.16.5'
+    mappings channel: 'official', version: '1.17.1'
 
     runs {
         client {
@@ -70,18 +71,18 @@ minecraft {
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.16.5-36.2.0'
+    minecraft 'net.minecraftforge:forge:1.17.1-37.0.7'
     
-    compileOnly fg.deobf("curse.maven:ftbquests-289412:3385407")
-    runtimeOnly fg.deobf("curse.maven:ftbquests-289412:3385407")
-    compileOnly fg.deobf("curse.maven:ftbguilibrary-404465:3373833")
-    runtimeOnly fg.deobf("curse.maven:ftbguilibrary-404465:3373833")
-    compileOnly fg.deobf("curse.maven:itemfilters-309674:3376819")
-    runtimeOnly fg.deobf("curse.maven:itemfilters-309674:3376819")
-    compileOnly fg.deobf("curse.maven:ftbteams-forge-404468:3373835")
-    runtimeOnly fg.deobf("curse.maven:ftbteams-forge-404468:3373835")
-    compileOnly fg.deobf("curse.maven:architecturyforge-419699:3385660")
-    runtimeOnly fg.deobf("curse.maven:architecturyforge-419699:3385660")
+    //compileOnly fg.deobf("curse.maven:ftbquests-289412:3385407")
+    //runtimeOnly fg.deobf("curse.maven:ftbquests-289412:3385407")
+    //compileOnly fg.deobf("curse.maven:ftbguilibrary-404465:3373833")
+    //runtimeOnly fg.deobf("curse.maven:ftbguilibrary-404465:3373833")
+    //compileOnly fg.deobf("curse.maven:itemfilters-309674:3376819")
+    //runtimeOnly fg.deobf("curse.maven:itemfilters-309674:3376819")
+    //compileOnly fg.deobf("curse.maven:ftbteams-forge-404468:3373835")
+    //runtimeOnly fg.deobf("curse.maven:ftbteams-forge-404468:3373835")
+    //compileOnly fg.deobf("curse.maven:architecturyforge-419699:3385660")
+    //runtimeOnly fg.deobf("curse.maven:architecturyforge-419699:3385660")
 }
 
 jar {

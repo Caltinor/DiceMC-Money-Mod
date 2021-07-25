@@ -13,24 +13,24 @@ import dicemc.money.MoneyMod;
 import dicemc.money.MoneyMod.AcctTypes;
 import dicemc.money.setup.Config;
 import dicemc.money.storage.MoneyWSD;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.WallSignBlock;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.WritableBookItem;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.JsonToNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.tileentity.SignTileEntity;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.World;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.WallSignBlock;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.WritableBookItem;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.TagParser;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.world.level.block.entity.SignBlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.core.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.common.util.Constants.BlockFlags;
 import net.minecraftforge.common.util.Constants.NBT;
 import net.minecraftforge.common.util.LazyOptional;
@@ -55,24 +55,24 @@ public class EventHandler {
 	@SuppressWarnings("resource")
 	@SubscribeEvent
 	public static void onPlayerLogin(PlayerLoggedInEvent event) {
-		if (!event.getPlayer().getCommandSenderWorld().isClientSide && event.getPlayer() instanceof ServerPlayerEntity) {
-			ServerPlayerEntity player = (ServerPlayerEntity) event.getEntity();
+		if (!event.getPlayer().getCommandSenderWorld().isClientSide && event.getPlayer() instanceof ServerPlayer) {
+			ServerPlayer player = (ServerPlayer) event.getEntity();
 			String symbol = Config.CURRENCY_SYMBOL.get();
 			double balP = MoneyWSD.get(player.getServer().overworld()).getBalance(AcctTypes.PLAYER.key, player.getUUID());
-			player.sendMessage(new StringTextComponent(symbol+String.valueOf(balP)), player.getUUID());
+			player.sendMessage(new TextComponent(symbol+String.valueOf(balP)), player.getUUID());
 		}
 	}
 	
 	@SuppressWarnings("resource")
 	@SubscribeEvent
 	public static void onPlayerDeath(LivingDeathEvent event) {
-		if (!event.getEntityLiving().getCommandSenderWorld().isClientSide && event.getEntityLiving() instanceof PlayerEntity) {
-			PlayerEntity player = (PlayerEntity) event.getEntityLiving();
+		if (!event.getEntityLiving().getCommandSenderWorld().isClientSide && event.getEntityLiving() instanceof Player) {
+			Player player = (Player) event.getEntityLiving();
 			double balp = MoneyWSD.get(player.getServer().overworld()).getBalance(AcctTypes.PLAYER.key, player.getUUID());
 			double loss = balp * Config.LOSS_ON_DEATH.get();
 			if (loss > 0) {
 				MoneyWSD.get(player.getServer().overworld()).changeBalance(AcctTypes.PLAYER.key, player.getUUID(), -loss);
-				player.sendMessage(new TranslationTextComponent("message.death", loss), player.getUUID());
+				player.sendMessage(new TranslatableComponent("message.death", loss), player.getUUID());
 			}
 		}
 	}
@@ -112,10 +112,10 @@ public class EventHandler {
 	@SubscribeEvent
 	public static void onShopBreak(BreakEvent event) {
 		if (!event.getWorld().isClientSide() && event.getWorld().getBlockState(event.getPos()).getBlock() instanceof WallSignBlock) {
-			SignTileEntity tile = (SignTileEntity) event.getWorld().getBlockEntity(event.getPos());
-			CompoundNBT nbt = tile.getTileData();
+			SignBlockEntity tile = (SignBlockEntity) event.getWorld().getBlockEntity(event.getPos());
+			CompoundTag nbt = tile.getTileData();
 			if (!nbt.isEmpty() && nbt.contains("shop-activated")) {
-				PlayerEntity player = event.getPlayer();
+				Player player = event.getPlayer();
 				boolean hasPerms = player.hasPermissions(Config.ADMIN_LEVEL.get());
 				if (!nbt.getUUID("owner").equals(player.getUUID())) {					
 					event.setCanceled(!hasPerms);					
@@ -129,7 +129,7 @@ public class EventHandler {
 		else if (!event.getWorld().isClientSide() && event.getWorld().getBlockEntity(event.getPos()) != null) {
 			if (event.getWorld().getBlockEntity(event.getPos()).getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).isPresent()) {
 				if (event.getWorld().getBlockEntity(event.getPos()).getTileData().contains("is-shop")) {
-					PlayerEntity player = event.getPlayer();
+					Player player = event.getPlayer();
 					event.setCanceled(!player.hasPermissions(Config.ADMIN_LEVEL.get()));
 				}
 			}
@@ -138,7 +138,7 @@ public class EventHandler {
 	
 	@SubscribeEvent
 	public static void onStorageOpen(RightClickBlock event) {
-		TileEntity invTile = event.getWorld().getBlockEntity(event.getPos());
+		BlockEntity invTile = event.getWorld().getBlockEntity(event.getPos());
 		if (invTile != null && invTile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).isPresent()) {
 			if (invTile.getTileData().contains("is-shop")) {
 				if (!invTile.getTileData().getUUID("owner").equals(event.getPlayer().getUUID())) {					
@@ -152,8 +152,8 @@ public class EventHandler {
 	@SubscribeEvent
 	public static void onSignLeftClick(LeftClickBlock event) {
 		if (!event.getWorld().isClientSide && event.getWorld().getBlockState(event.getPos()).getBlock() instanceof WallSignBlock) {
-			SignTileEntity tile = (SignTileEntity) event.getWorld().getBlockEntity(event.getPos());
-			CompoundNBT nbt = tile.getTileData();
+			SignBlockEntity tile = (SignBlockEntity) event.getWorld().getBlockEntity(event.getPos());
+			CompoundTag nbt = tile.getTileData();
 			if (nbt.contains("shop-activated"))	
 				getSaleInfo(nbt, event.getPlayer());
 		}
@@ -167,10 +167,10 @@ public class EventHandler {
 			WallSignBlock sign = (WallSignBlock) state.getBlock();
 			BlockPos backBlock = BlockPos.of(BlockPos.offset(event.getPos().asLong(), state.getValue(sign.FACING).getOpposite()));
 			if (event.getWorld().getBlockEntity(backBlock) != null) {
-				TileEntity invTile = event.getWorld().getBlockEntity(backBlock);
+				BlockEntity invTile = event.getWorld().getBlockEntity(backBlock);
 				if (invTile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).isPresent()) {
-					SignTileEntity tile = (SignTileEntity) event.getWorld().getBlockEntity(event.getPos());
-					CompoundNBT nbt = tile.serializeNBT();
+					SignBlockEntity tile = (SignBlockEntity) event.getWorld().getBlockEntity(event.getPos());
+					CompoundTag nbt = tile.serializeNBT();
 					if (!nbt.contains("ForgeData") || !nbt.getCompound("ForgeData").contains("shop-activated")) {
 						activateShop(invTile, tile, event.getWorld(), event.getPos(), nbt, event.getPlayer());				
 					}
@@ -180,9 +180,9 @@ public class EventHandler {
 		}
 	}
 	
-	private static void activateShop(TileEntity storage, SignTileEntity tile, World world, BlockPos pos, CompoundNBT nbt, PlayerEntity player) {
-		ITextComponent actionEntry = ITextComponent.Serializer.fromJson(nbt.getString("Text1"));
-		ITextComponent priceEntry  = ITextComponent.Serializer.fromJson(nbt.getString("Text4"));
+	private static void activateShop(BlockEntity storage, SignBlockEntity tile, Level world, BlockPos pos, CompoundTag nbt, Player player) {
+		Component actionEntry = Component.Serializer.fromJson(nbt.getString("Text1"));
+		Component priceEntry  = Component.Serializer.fromJson(nbt.getString("Text4"));
 		//check if the storage block has an item in the first slot
 		LazyOptional<IItemHandler> inv = storage.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, Direction.UP);
 		ItemStack srcStack = inv.map((c) -> {
@@ -201,22 +201,22 @@ public class EventHandler {
 			//second confirm the price value is valid
 			if (actionEntry.getContents().equalsIgnoreCase("[server-buy]") || actionEntry.getContents().equalsIgnoreCase("[server-sell]")) {
 				if (!player.hasPermissions(Config.ADMIN_LEVEL.get())) {
-					player.sendMessage(new TranslationTextComponent("message.activate.failure.admin"), player.getUUID());
+					player.sendMessage(new TranslatableComponent("message.activate.failure.admin"), player.getUUID());
 					return;
 				}
 			}
 			else if (!player.hasPermissions(Config.SHOP_LEVEL.get())) {
-				player.sendMessage(new TranslationTextComponent("message.activate.failure.admin"), player.getUUID());
+				player.sendMessage(new TranslatableComponent("message.activate.failure.admin"), player.getUUID());
 				return;
 			}
 			try {
 				double price = Math.abs(Double.valueOf(priceEntry.getString()));
 				tile.getTileData().putDouble("price", price);
-				StringTextComponent newAction = new StringTextComponent(actionEntry.getContents());
-				newAction.withStyle(TextFormatting.BLUE);
+				TextComponent newAction = new TextComponent(actionEntry.getContents());
+				newAction.withStyle(ChatFormatting.BLUE);
 				tile.setMessage(0, newAction);
-				StringTextComponent newPrice = new StringTextComponent(Config.CURRENCY_SYMBOL.get()+String.valueOf(price));
-				newPrice.withStyle(TextFormatting.GOLD);
+				TextComponent newPrice = new TextComponent(Config.CURRENCY_SYMBOL.get()+String.valueOf(price));
+				newPrice.withStyle(ChatFormatting.GOLD);
 				tile.setMessage(3, newPrice);
 				System.out.println(actionEntry.getContents());
 				switch (actionEntry.getContents()) {
@@ -228,7 +228,7 @@ public class EventHandler {
 				tile.getTileData().putBoolean("shop-activated", true);
 				tile.getTileData().putUUID("owner", player.getUUID());
 				//Serialize all items in the TE and store them in a ListNBT
-				ListNBT lnbt = new ListNBT();
+				ListTag lnbt = new ListTag();
 				inv.ifPresent((p) -> {
 					for (int i = 0; i < p.getSlots(); i++) {
 						ItemStack inSlot = p.getStackInSlot(i);
@@ -244,25 +244,25 @@ public class EventHandler {
 				tile.setChanged();
 				storage.getTileData().putBoolean("is-shop", true);
 				storage.getTileData().putUUID("owner", player.getUUID());
-				storage.save(new CompoundNBT());
+				storage.save(new CompoundTag());
 				BlockState state = world.getBlockState(pos);
 				world.sendBlockUpdated(pos, state, state, BlockFlags.DEFAULT_AND_RERENDER);
 			}
 			catch(NumberFormatException e) {
-				player.sendMessage(new TranslationTextComponent("message.activate.failure.money"), player.getUUID());
+				player.sendMessage(new TranslatableComponent("message.activate.failure.money"), player.getUUID());
 				world.destroyBlock(pos, true, player);
 			}
 		}
 	}
 	
-	private static CompoundNBT getItemFromBook(ItemStack stack) {
-		CompoundNBT nbt = stack.getTag();
+	private static CompoundTag getItemFromBook(ItemStack stack) {
+		CompoundTag nbt = stack.getTag();
 		if (nbt.isEmpty()) return stack.serializeNBT();
 		String page = nbt.getList("pages", NBT.TAG_STRING).get(0).getAsString();
 		if (page.substring(0, 7).equalsIgnoreCase("vending")) {
 			String subStr = page.substring(8);
 			try {
-				stack = ItemStack.of(JsonToNBT.parseTag(subStr));
+				stack = ItemStack.of(TagParser.parseTag(subStr));
 				return stack.serializeNBT();
 			}
 			catch(CommandSyntaxException e) {e.printStackTrace();}
@@ -271,25 +271,25 @@ public class EventHandler {
 		return stack.serializeNBT();
 	}
 	
-	private static void getSaleInfo(CompoundNBT nbt, PlayerEntity player) {
+	private static void getSaleInfo(CompoundTag nbt, Player player) {
 		if (System.currentTimeMillis() - timeSinceClick.getOrDefault(player.getUUID(), 0l) < 1500) return;
 		String type = nbt.getString("shop-type");
 		boolean isBuy = type.equalsIgnoreCase("buy") || type.equalsIgnoreCase("server-buy");
 		List<ItemStack> transItems = new ArrayList<>();
-		ListNBT itemsList = nbt.getList("items", NBT.TAG_COMPOUND);
+		ListTag itemsList = nbt.getList("items", NBT.TAG_COMPOUND);
 		for (int i = 0; i < itemsList.size(); i++) {
 			transItems.add(ItemStack.of(itemsList.getCompound(i)));
 		}
 		double value = nbt.getDouble("price");
-		StringTextComponent itemComponent = getTransItemsDisplayString(transItems);
+		TextComponent itemComponent = getTransItemsDisplayString(transItems);
 		if (isBuy)
-			player.sendMessage(new TranslationTextComponent("message.shop.info", itemComponent, Config.CURRENCY_SYMBOL.get()+String.valueOf(value)), player.getUUID());
+			player.sendMessage(new TranslatableComponent("message.shop.info", itemComponent, Config.CURRENCY_SYMBOL.get()+String.valueOf(value)), player.getUUID());
 		else
-			player.sendMessage(new TranslationTextComponent("message.shop.info", Config.CURRENCY_SYMBOL.get()+String.valueOf(value), itemComponent), player.getUUID());
+			player.sendMessage(new TranslatableComponent("message.shop.info", Config.CURRENCY_SYMBOL.get()+String.valueOf(value), itemComponent), player.getUUID());
 		timeSinceClick.put(player.getUUID(), System.currentTimeMillis());
 	}
 	
-	private static StringTextComponent getTransItemsDisplayString(List<ItemStack> list ) {
+	private static TextComponent getTransItemsDisplayString(List<ItemStack> list ) {
 		List<ItemStack> items = new ArrayList<>();
 		for (int l = 0; l < list.size(); l++) {
 			boolean hadMatch = false;
@@ -302,7 +302,7 @@ public class EventHandler {
 			}
 			if (!hadMatch) items.add(list.get(l));
 		}
-		StringTextComponent itemComponent = new StringTextComponent("");
+		TextComponent itemComponent = new TextComponent("");
 		boolean isFirst = true;
 		for (ItemStack item : items) {
 			if (!isFirst) itemComponent.append(", ");
@@ -313,12 +313,12 @@ public class EventHandler {
 		return itemComponent;
 	}
 	
-	private static void processTransaction(TileEntity tile, SignTileEntity sign, PlayerEntity player) {
+	private static void processTransaction(BlockEntity tile, SignBlockEntity sign, Player player) {
 		MoneyWSD wsd = MoneyWSD.get(player.getServer().overworld());
-		CompoundNBT nbt = sign.getTileData();
+		CompoundTag nbt = sign.getTileData();
 		LazyOptional<IItemHandler> inv = tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY);
 		List<ItemStack> transItems = new ArrayList<>();
-		ListNBT itemsList = nbt.getList("items", NBT.TAG_COMPOUND);
+		ListTag itemsList = nbt.getList("items", NBT.TAG_COMPOUND);
 		for (int i = 0; i < itemsList.size(); i++) {
 			transItems.add(ItemStack.of(itemsList.getCompound(i)));
 		}
@@ -330,13 +330,13 @@ public class EventHandler {
 			//First check the available funds and stock for trade
 			double balP = wsd.getBalance(AcctTypes.PLAYER.key, player.getUUID());
 			if (value > balP) {
-				player.sendMessage(new TranslationTextComponent("message.shop.buy.failure.funds"), player.getUUID());
+				player.sendMessage(new TranslatableComponent("message.shop.buy.failure.funds"), player.getUUID());
 				return;
 			}
 			Map<Integer, ItemStack> slotMap = new HashMap<>();
 			for (int tf = 0; tf < transItems.size(); tf++) {
 				int[] stackSize = {transItems.get(tf).getCount()};
-				final Integer t = new Integer(tf);
+				final Integer t = Integer.valueOf(tf);
 				Optional<Boolean> test = inv.map((p) -> {
 					for (int i = 0; i < p.getSlots(); i++) {
 						ItemStack inSlot = ItemStack.EMPTY;
@@ -354,7 +354,7 @@ public class EventHandler {
 					return stackSize[0] <= 0;
 				});
 				if (!test.get()) {
-					player.sendMessage(new TranslationTextComponent("message.shop.buy.failure.stock"), player.getUUID());
+					player.sendMessage(new TranslatableComponent("message.shop.buy.failure.stock"), player.getUUID());
 					return;
 				}
 			}
@@ -364,10 +364,10 @@ public class EventHandler {
 			wsd.transferFunds(AcctTypes.PLAYER.key, player.getUUID(), AcctTypes.PLAYER.key, shopOwner, value);
 			inv.ifPresent((p) -> {
 				for (Map.Entry<Integer, ItemStack> map : slotMap.entrySet()) {
-					player.inventory.add(p.extractItem(map.getKey(), map.getValue().getCount(), false));
+					player.getInventory().add(p.extractItem(map.getKey(), map.getValue().getCount(), false));
 				}
 			});
-			TranslationTextComponent msg =  new TranslationTextComponent("message.shop.buy.success"
+			TranslatableComponent msg =  new TranslatableComponent("message.shop.buy.success"
 					, getTransItemsDisplayString(transItems), Config.CURRENCY_SYMBOL.get()+String.valueOf(value));
 			player.sendMessage(msg, player.getUUID());
 			player.getServer().sendMessage(msg, player.getUUID());
@@ -379,7 +379,7 @@ public class EventHandler {
 			UUID shopOwner = nbt.getUUID("owner");
 			double balP = wsd.getBalance(AcctTypes.PLAYER.key, shopOwner);
 			if (value > balP) {
-				player.sendMessage(new TranslationTextComponent("message.shop.sell.failure.funds"), player.getUUID());
+				player.sendMessage(new TranslatableComponent("message.shop.sell.failure.funds"), player.getUUID());
 				return;
 			}
 			//test if player has item in inventory to sell
@@ -387,8 +387,8 @@ public class EventHandler {
 			Map<Integer, ItemStack> slotMap = new HashMap<>();
 			for (int t = 0; t < transItems.size(); t++) {
 				int stackSize = transItems.get(t).getCount();
-				for (int i = 0; i < player.inventory.getContainerSize(); i++) {
-					ItemStack inSlot = player.inventory.getItem(i).copy();
+				for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
+					ItemStack inSlot = player.getInventory().getItem(i).copy();
 					int count = stackSize > inSlot.getCount() ? inSlot.getCount() : stackSize;
 					inSlot.setCount(count);
 					if (slotMap.containsKey(i) && transItems.get(t).getItem().equals(slotMap.get(i).getItem()) && ItemStack.tagMatches(transItems.get(t), slotMap.get(i))) {
@@ -402,7 +402,7 @@ public class EventHandler {
 					if (stackSize <= 0) break;
 				}
 				if (stackSize > 0) {
-					player.sendMessage(new TranslationTextComponent("message.shop.sell.failure.stock"), player.getUUID());
+					player.sendMessage(new TranslatableComponent("message.shop.sell.failure.stock"), player.getUUID());
 					return;
 				}
 				
@@ -429,7 +429,7 @@ public class EventHandler {
 						}
 					}
 					if (!sim.isEmpty()) {
-						player.sendMessage(new TranslationTextComponent("message.shop.sell.failure.space"), player.getUUID());
+						player.sendMessage(new TranslatableComponent("message.shop.sell.failure.space"), player.getUUID());
 						return false;
 					}
 					return true;
@@ -439,14 +439,14 @@ public class EventHandler {
 			//Process Transfers now that reqs have been met
 			wsd.transferFunds(AcctTypes.PLAYER.key, shopOwner, AcctTypes.PLAYER.key, player.getUUID(), value);
 			for (Map.Entry<Integer, ItemStack> pSlots : slotMap.entrySet()) {
-				player.inventory.removeItem(pSlots.getKey(), pSlots.getValue().getCount());
+				player.getInventory().removeItem(pSlots.getKey(), pSlots.getValue().getCount());
 			}
 			inv.ifPresent((p) -> {
 				for (Map.Entry<Integer, ItemStack> map : invSlotMap.entrySet()) {
 					p.insertItem(map.getKey(), map.getValue(), false);
 				}
 			});
-			player.sendMessage(new TranslationTextComponent("message.shop.sell.success"
+			player.sendMessage(new TranslatableComponent("message.shop.sell.success"
 					, Config.CURRENCY_SYMBOL.get()+String.valueOf(value), getTransItemsDisplayString(transItems)
 					), player.getUUID());
 			return;
@@ -456,14 +456,14 @@ public class EventHandler {
 			//First check the available funds and stock for trade
 			double balP = wsd.getBalance(AcctTypes.PLAYER.key, player.getUUID());
 			if (value > balP) {
-				player.sendMessage(new TranslationTextComponent("message.shop.buy.failure.funds"), player.getUUID());
+				player.sendMessage(new TranslatableComponent("message.shop.buy.failure.funds"), player.getUUID());
 				return;
 			}
 			wsd.changeBalance(AcctTypes.PLAYER.key, player.getUUID(), -value);
 			for (int i = 0; i < transItems.size(); i++) {
-				player.inventory.add(transItems.get(i).copy());
+				player.getInventory().add(transItems.get(i).copy());
 			}
-			player.sendMessage(new TranslationTextComponent("message.shop.buy.success"
+			player.sendMessage(new TranslatableComponent("message.shop.buy.success"
 					, getTransItemsDisplayString(transItems), Config.CURRENCY_SYMBOL.get()+String.valueOf(value)
 					), player.getUUID());
 			return;
@@ -473,8 +473,8 @@ public class EventHandler {
 			Map<Integer, ItemStack> slotMap = new HashMap<>();
 			for (int t = 0; t < transItems.size(); t++) {
 				int stackSize = transItems.get(t).getCount();
-				for (int i = 0; i < player.inventory.getContainerSize(); i++) {
-					ItemStack inSlot = player.inventory.getItem(i).copy();
+				for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
+					ItemStack inSlot = player.getInventory().getItem(i).copy();
 					int count = stackSize > inSlot.getCount() ? inSlot.getCount() : stackSize;
 					inSlot.setCount(count);
 					if (slotMap.containsKey(i) && transItems.get(t).getItem().equals(slotMap.get(i).getItem()) && ItemStack.tagMatches(transItems.get(t), slotMap.get(i))) {
@@ -488,16 +488,16 @@ public class EventHandler {
 					if (stackSize <= 0) break;
 				}
 				if (stackSize > 0) {
-					player.sendMessage(new TranslationTextComponent("message.shop.sell.failure.stock"), player.getUUID());
+					player.sendMessage(new TranslatableComponent("message.shop.sell.failure.stock"), player.getUUID());
 					return;
 				}
 				
 			}
 			wsd.changeBalance(AcctTypes.PLAYER.key, player.getUUID(), value);
 			for (Map.Entry<Integer, ItemStack> pSlots : slotMap.entrySet()) {
-				player.inventory.getItem(pSlots.getKey()).shrink(pSlots.getValue().getCount());
+				player.getInventory().getItem(pSlots.getKey()).shrink(pSlots.getValue().getCount());
 			}
-			player.sendMessage(new TranslationTextComponent("message.shop.sell.success"
+			player.sendMessage(new TranslatableComponent("message.shop.sell.success"
 					, Config.CURRENCY_SYMBOL.get()+String.valueOf(value), getTransItemsDisplayString(transItems)
 					), player.getUUID());
 			return;

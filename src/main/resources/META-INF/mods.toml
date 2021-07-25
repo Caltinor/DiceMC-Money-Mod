@@ -19,12 +19,12 @@ A server side money mod with sign-shops.
 [[dependencies.dicemcmm]] #optional
     modId="forge" #mandatory
     mandatory=true #mandatory
-    versionRange="[32.0.1,)" #mandatory
+    versionRange="[37.0.1,)" #mandatory
     ordering="NONE"
     side="BOTH"
 [[dependencies.dicemcmm]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.16.1,1.17)"
+    versionRange="[1.17.1,1.18)"
     ordering="NONE"
     side="BOTH"
