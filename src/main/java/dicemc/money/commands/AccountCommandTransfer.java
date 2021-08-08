@@ -14,16 +14,16 @@ import dicemc.money.MoneyMod;
 import dicemc.money.MoneyMod.AcctTypes;
 import dicemc.money.setup.Config;
 import dicemc.money.storage.MoneyWSD;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.server.level.ServerLevel;
 
-public class AccountCommandTransfer implements Command<CommandSource>{
+public class AccountCommandTransfer implements Command<CommandSourceStack>{
 private static final AccountCommandTransfer CMD = new AccountCommandTransfer();
 	
-	public static ArgumentBuilder<CommandSource, ?> register(CommandDispatcher<CommandSource> dispatcher) {
+	public static ArgumentBuilder<CommandSourceStack, ?> register(CommandDispatcher<CommandSourceStack> dispatcher) {
 		return Commands.literal("transfer")
 				.then(Commands.argument("value", DoubleArgumentType.doubleArg(0d))
 						.then(Commands.argument("recipient", StringArgumentType.word())
@@ -32,9 +32,9 @@ private static final AccountCommandTransfer CMD = new AccountCommandTransfer();
 	}
 
 	@Override
-	public int run(CommandContext<CommandSource> context) throws CommandSyntaxException {
-		ServerPlayerEntity player = context.getSource().getPlayerOrException();
-		ServerWorld world = context.getSource().getServer().overworld();
+	public int run(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+		ServerPlayer player = context.getSource().getPlayerOrException();
+		ServerLevel world = context.getSource().getServer().overworld();
 		double value = DoubleArgumentType.getDouble(context, "value");
 		UUID recipient = context.getSource().getServer().getProfileCache().get(StringArgumentType.getString(context, "recipient")).getId();
 		if (MoneyWSD.get(world).transferFunds(AcctTypes.PLAYER.key, player.getUUID(), AcctTypes.PLAYER.key, recipient, value)) {
@@ -43,10 +43,10 @@ private static final AccountCommandTransfer CMD = new AccountCommandTransfer();
 						, recipient, AcctTypes.PLAYER.key, context.getSource().getServer().getProfileCache().get(recipient).getName()
 						, value, "Player Transfer Command. From is who executed");
 			}
-			context.getSource().sendSuccess(new TranslationTextComponent("message.command.transfer.success", Math.abs(value), StringArgumentType.getString(context, "recipient")), true);
+			context.getSource().sendSuccess(new TranslatableComponent("message.command.transfer.success", Math.abs(value), StringArgumentType.getString(context, "recipient")), true);
 		}
 		else 
-			context.getSource().sendSuccess(new TranslationTextComponent("message.command.transfer.failure"), false);
+			context.getSource().sendSuccess(new TranslatableComponent("message.command.transfer.failure"), false);
 		return 0;
 	}
 }

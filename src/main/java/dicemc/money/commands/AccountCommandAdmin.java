@@ -15,17 +15,17 @@ import dicemc.money.MoneyMod.AcctTypes;
 import dicemc.money.setup.Config;
 import dicemc.money.storage.DatabaseManager;
 import dicemc.money.storage.MoneyWSD;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
-import net.minecraft.command.arguments.EntityArgument;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 
 public class AccountCommandAdmin{
 	//TODO add in a looper to accept multiple players as arguments and apply the command to all of them
-	public static ArgumentBuilder<CommandSource, ?> register(CommandDispatcher<CommandSource> dispatcher) {
+	public static ArgumentBuilder<CommandSourceStack, ?> register(CommandDispatcher<CommandSourceStack> dispatcher) {
 		return Commands.literal("admin")
 				.requires((p) -> p.hasPermission(Config.ADMIN_LEVEL.get()))
 				.then(Commands.literal("byName")
@@ -69,10 +69,10 @@ public class AccountCommandAdmin{
 
 	}
 	
-	public static int process(CommandContext<CommandSource> context) throws CommandSyntaxException {
+	public static int process(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
 		//get the argument that is actually present
 		GameProfile player = null;
-		try {player = context.getSource().getServer().getProfileCache().get(StringArgumentType.getString(context, "player"));}
+		try {player = context.getSource().getServer().getProfileCache().get(StringArgumentType.getString(context, "player")).get();}
 		catch (IllegalArgumentException e) {}
 		if (player == null) { try { 
 			player = EntityArgument.getPlayer(context, "player").getGameProfile();}
@@ -86,7 +86,7 @@ public class AccountCommandAdmin{
 		String symbol = Config.CURRENCY_SYMBOL.get();
 		double value = DoubleArgumentType.getDouble(context, "amount");
 		if (pid == null) {
-			context.getSource().sendFailure(new TranslationTextComponent("message.command.playernotfound"));
+			context.getSource().sendFailure(new TranslatableComponent("message.command.playernotfound"));
 			return 1;
 		}
 		switch (option) {
@@ -103,10 +103,10 @@ public class AccountCommandAdmin{
 							, value, "Admin Set Command");
 				}
 				context.getSource().sendSuccess(
-					new TranslationTextComponent("message.command.set.success", player.getName(), symbol+String.valueOf(value)), true);
+					new TranslatableComponent("message.command.set.success", player.getName(), symbol+String.valueOf(value)), true);
 				return 0;
 			}
-			context.getSource().sendFailure(new TranslationTextComponent("message.command.set.failure"));
+			context.getSource().sendFailure(new TranslatableComponent("message.command.set.failure"));
 			return 1;
 		}
 		case "give": {
@@ -122,10 +122,10 @@ public class AccountCommandAdmin{
 							, value, "Admin Give Command");
 				}
 				context.getSource().sendSuccess(
-					new TranslationTextComponent("message.command.give.success", symbol+String.valueOf(value), player.getName()), true);
+					new TranslatableComponent("message.command.give.success", symbol+String.valueOf(value), player.getName()), true);
 				return 0;
 			}
-			context.getSource().sendFailure(new TranslationTextComponent("message.command.change.failure"));
+			context.getSource().sendFailure(new TranslatableComponent("message.command.change.failure"));
 			return 1;
 		}
 		case "take": {
@@ -141,20 +141,20 @@ public class AccountCommandAdmin{
 							, value, "Admin Take Command");
 				}
 				context.getSource().sendSuccess(
-					new TranslationTextComponent("message.command.take.success", symbol+String.valueOf(value), player.getName()), true);
+					new TranslatableComponent("message.command.take.success", symbol+String.valueOf(value), player.getName()), true);
 				return 0;
 			}
-			context.getSource().sendFailure(new TranslationTextComponent("message.command.change.failure"));
+			context.getSource().sendFailure(new TranslatableComponent("message.command.change.failure"));
 			return 1;
 		}
 		default:}
 		return 0;
 	}
 	
-	public static int balance(CommandContext<CommandSource> context) throws CommandSyntaxException {
+	public static int balance(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
 		//get the argument that is actually present
 		GameProfile player = null;
-		try {player = context.getSource().getServer().getProfileCache().get(StringArgumentType.getString(context, "player"));}
+		try {player = context.getSource().getServer().getProfileCache().get(StringArgumentType.getString(context, "player")).get();}
 		catch (IllegalArgumentException e) {}
 		if (player == null) { try { 
 			player = EntityArgument.getPlayer(context, "player").getGameProfile();}
@@ -164,20 +164,20 @@ public class AccountCommandAdmin{
 		MoneyWSD wsd = MoneyWSD.get(context.getSource().getServer().overworld());
 		String symbol = Config.CURRENCY_SYMBOL.get();
 		if (player == null) {
-			context.getSource().sendFailure(new TranslationTextComponent("message.command.playernotfound"));
+			context.getSource().sendFailure(new TranslatableComponent("message.command.playernotfound"));
 			return 1;
 		}
 		double balP = wsd.getBalance(AcctTypes.PLAYER.key, player.getId()); 
-		context.getSource().sendSuccess(new StringTextComponent(symbol+String.valueOf(balP)), true);		
+		context.getSource().sendSuccess(new TextComponent(symbol+String.valueOf(balP)), true);		
 		return 0;
 	}
 	
-	public static int transfer(CommandContext<CommandSource> context) throws CommandSyntaxException {
+	public static int transfer(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
 		//get the argument that is actually present
 		GameProfile fromplayer = null;
 		GameProfile toplayer = null;
-		try {fromplayer = context.getSource().getServer().getProfileCache().get(StringArgumentType.getString(context, "from"));
-			toplayer = context.getSource().getServer().getProfileCache().get(StringArgumentType.getString(context, "to"));
+		try {fromplayer = context.getSource().getServer().getProfileCache().get(StringArgumentType.getString(context, "from")).get();
+			toplayer = context.getSource().getServer().getProfileCache().get(StringArgumentType.getString(context, "to")).get();
 		} catch (IllegalArgumentException e) {}
 		if (fromplayer == null && toplayer == null) { try { 
 			fromplayer = EntityArgument.getPlayer(context, "from").getGameProfile();
@@ -189,11 +189,11 @@ public class AccountCommandAdmin{
 		String symbol = Config.CURRENCY_SYMBOL.get();
 		double value = DoubleArgumentType.getDouble(context, "amount");
 		if (fromplayer == null) {
-			context.getSource().sendFailure(new TranslationTextComponent("message.command.playernotfound"));
+			context.getSource().sendFailure(new TranslatableComponent("message.command.playernotfound"));
 			return 1;
 		}
 		if (toplayer == null) {
-			context.getSource().sendFailure(new TranslationTextComponent("message.command.playernotfound"));
+			context.getSource().sendFailure(new TranslatableComponent("message.command.playernotfound"));
 			return 1;
 		}
 		boolean result = wsd.transferFunds(AcctTypes.PLAYER.key, fromplayer.getId(), AcctTypes.PLAYER.key, toplayer.getId(), value);
@@ -206,10 +206,10 @@ public class AccountCommandAdmin{
 						, toplayer.getId(), AcctTypes.PLAYER.key, toplayer.getName(), value, "Admin Transfer Command Executed by: "+ srcName);
 			}
 			context.getSource().sendSuccess(
-				new TranslationTextComponent("message.command.transfer.success", symbol+String.valueOf(value), toplayer.getName()), true);
+				new TranslatableComponent("message.command.transfer.success", symbol+String.valueOf(value), toplayer.getName()), true);
 			return 0;
 		}
-		context.getSource().sendFailure(new TranslationTextComponent("message.command.transfer.failure"));
+		context.getSource().sendFailure(new TranslatableComponent("message.command.transfer.failure"));
 		return 1;
 	}
 

@@ -3,17 +3,17 @@ package dicemc.money.api;
 import java.util.UUID;
 
 import dicemc.money.storage.MoneyWSD;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 
 public class MoneyManager implements IMoneyManager{
 	//Singleton 
 	private static final MoneyManager INSTANCE = new MoneyManager();
 	private MoneyManager() {}
 	public static MoneyManager get() {return INSTANCE;}
-	private ServerWorld world;
+	private ServerLevel world;
 	
-	public void setWorld(ServerWorld world) {this.world = world;}
+	public void setWorld(ServerLevel world) {this.world = world;}
 	
 	@Override
 	public double getBalance(ResourceLocation type, UUID id) {

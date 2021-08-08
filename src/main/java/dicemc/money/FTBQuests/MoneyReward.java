@@ -1,6 +1,6 @@
 package dicemc.money.FTBQuests;
 
-import dev.ftb.mods.ftblibrary.config.ConfigGroup;
+/*import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.reward.RewardType;
@@ -9,17 +9,17 @@ import dicemc.money.MoneyMod.AcctTypes;
 import dicemc.money.setup.Config;
 import dicemc.money.storage.DatabaseManager;
 import dicemc.money.storage.MoneyWSD;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-
-public class MoneyReward extends Reward{
-	public static RewardType MONEY_REWARD = FTBQHandler.MONEY_REWARD;
-	public double amount = 1;
+*/
+public class MoneyReward /*extends Reward*/{
+	/*public static RewardType MONEY_REWARD = FTBQHandler.MONEY_REWARD;
+	public double amount = 0;
 
 	public MoneyReward(Quest q) {
 		super(q);
@@ -29,38 +29,33 @@ public class MoneyReward extends Reward{
 	public RewardType getType() {return MONEY_REWARD;}
 
 	@Override
-	public void claim(ServerPlayerEntity player, boolean bool) {
-		MoneyWSD.get(player.getServer().overworld()).changeBalance(AcctTypes.PLAYER.key, player.getUUID(), amount);
-		if (Config.ENABLE_HISTORY.get()) {
-			MoneyMod.dbm.postEntry(System.currentTimeMillis(), DatabaseManager.NIL, AcctTypes.SERVER.key, "Server"
-					, player.getUUID(), AcctTypes.PLAYER.key, player.getName().getContents()
-					, amount, "Quest Claim Reward");
-		}
+	public void claim(ServerPlayer player, boolean bool) {
+		MoneyWSD.get(player.getServer().overworld()).changeBalance(AcctTypes.PLAYER.key, player.getUUID(), amount);		
 	}
 	
 	@Override
-    public void writeData( CompoundNBT nbt )
+    public void writeData( CompoundTag nbt )
     {
         super.writeData( nbt );
         nbt.putDouble("amount", amount);
     }
 
     @Override
-    public void readData( CompoundNBT nbt )
+    public void readData( CompoundTag nbt )
     {
         super.readData( nbt );
         amount = nbt.getDouble("amount");
     }
 
     @Override
-    public void writeNetData( PacketBuffer buffer )
+    public void writeNetData( FriendlyByteBuf buffer )
     {
         super.writeNetData(buffer );
         buffer.writeDouble( amount );
     }
 
     @Override
-    public void readNetData( PacketBuffer buffer )
+    public void readNetData( FriendlyByteBuf buffer )
     {
         super.readNetData(buffer );
         amount = buffer.readDouble();
@@ -75,9 +70,9 @@ public class MoneyReward extends Reward{
     }
     
     @Override
-    public IFormattableTextComponent getAltTitle()
+    public MutableComponent getAltTitle()
     {
-        return new TranslationTextComponent("ftbquests.reward.dicemcmm.moneyreward").append(" "+Config.CURRENCY_SYMBOL.get()+String.valueOf(amount));
+        return new TranslatableComponent("ftbquests.reward.dicemcmm.moneyreward").append(" "+Config.CURRENCY_SYMBOL.get()+String.valueOf(amount));
     }
-
+*/
 }

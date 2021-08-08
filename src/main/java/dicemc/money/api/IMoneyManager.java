@@ -2,7 +2,7 @@ package dicemc.money.api;
 
 import java.util.UUID;
 
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 public interface IMoneyManager {
 	double getBalance(ResourceLocation type, UUID id);
