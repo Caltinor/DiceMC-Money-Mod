@@ -25,7 +25,7 @@ version = '2.0.9'
 group = 'dicemc.money' 
 archivesBaseName = 'DiceMC Money'
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(8)
+java.toolchain.languageVersion = JavaLanguageVersion.of(16)
 
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
 minecraft {
@@ -73,8 +73,8 @@ minecraft {
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.17.1-37.0.7'
-    implementation files("C:/MinecraftModding/1-16-2/h2-1.4.200.jar")
+    minecraft 'net.minecraftforge:forge:1.17.1-37.0.27'
+    implementation files("C:/MinecraftModding/1-16-2/h2-1.4.200.jar") 
     
     //compileOnly fg.deobf("curse.maven:ftbquests-289412:3385407")
     //runtimeOnly fg.deobf("curse.maven:ftbquests-289412:3385407")

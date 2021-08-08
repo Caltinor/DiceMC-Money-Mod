@@ -371,7 +371,7 @@ public class EventHandler {
 				String itemPrint = "";
 				itemsList.forEach((a) -> {itemPrint.concat(a.getAsString());});
 				MoneyMod.dbm.postEntry(System.currentTimeMillis(), player.getUUID(), AcctTypes.PLAYER.key, player.getName().getContents()
-						, shopOwner, AcctTypes.PLAYER.key, player.getServer().getProfileCache().get(shopOwner).getName()
+						, shopOwner, AcctTypes.PLAYER.key, player.getServer().getProfileCache().get(shopOwner).get().getName()
 						, value, itemsList.getAsString());
 			}
 			inv.ifPresent((p) -> {
@@ -453,7 +453,7 @@ public class EventHandler {
 			if (Config.ENABLE_HISTORY.get()) {
 				String itemPrint = "";
 				itemsList.forEach((a) -> {itemPrint.concat(a.getAsString());});
-				MoneyMod.dbm.postEntry(System.currentTimeMillis(), shopOwner, AcctTypes.PLAYER.key, player.getServer().getProfileCache().get(shopOwner).getName()
+				MoneyMod.dbm.postEntry(System.currentTimeMillis(), shopOwner, AcctTypes.PLAYER.key, player.getServer().getProfileCache().get(shopOwner).get().getName()
 						, player.getUUID(), AcctTypes.PLAYER.key, player.getName().getContents()
 						, value, itemsList.getAsString());
 			}

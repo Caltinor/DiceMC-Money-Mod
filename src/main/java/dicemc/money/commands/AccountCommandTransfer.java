@@ -36,11 +36,11 @@ private static final AccountCommandTransfer CMD = new AccountCommandTransfer();
 		ServerPlayer player = context.getSource().getPlayerOrException();
 		ServerLevel world = context.getSource().getServer().overworld();
 		double value = DoubleArgumentType.getDouble(context, "value");
-		UUID recipient = context.getSource().getServer().getProfileCache().get(StringArgumentType.getString(context, "recipient")).getId();
+		UUID recipient = context.getSource().getServer().getProfileCache().get(StringArgumentType.getString(context, "recipient")).get().getId();
 		if (MoneyWSD.get(world).transferFunds(AcctTypes.PLAYER.key, player.getUUID(), AcctTypes.PLAYER.key, recipient, value)) {
 			if (Config.ENABLE_HISTORY.get()) {
 				MoneyMod.dbm.postEntry(System.currentTimeMillis(), player.getUUID(), AcctTypes.PLAYER.key, player.getName().getContents()
-						, recipient, AcctTypes.PLAYER.key, context.getSource().getServer().getProfileCache().get(recipient).getName()
+						, recipient, AcctTypes.PLAYER.key, context.getSource().getServer().getProfileCache().get(recipient).get().getName()
 						, value, "Player Transfer Command. From is who executed");
 			}
 			context.getSource().sendSuccess(new TranslatableComponent("message.command.transfer.success", Math.abs(value), StringArgumentType.getString(context, "recipient")), true);

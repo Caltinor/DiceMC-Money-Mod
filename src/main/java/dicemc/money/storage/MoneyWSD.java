@@ -77,7 +77,7 @@ public class MoneyWSD extends SavedData implements IMoneyManager{
 			accounts.get(type).put(owner, Config.STARTING_FUNDS.get());
 			if (Config.ENABLE_HISTORY.get()) 
 				MoneyMod.dbm.postEntry(System.currentTimeMillis(), DatabaseManager.NIL, AcctTypes.SERVER.key, "Server"
-						, owner, type, MoneyMod.dbm.server.getProfileCache().get(owner).getName()
+						, owner, type, MoneyMod.dbm.server.getProfileCache().get(owner).get().getName()
 						, Config.STARTING_FUNDS.get(), "Starting Funds Deposit");
 			this.setDirty();
 		}
