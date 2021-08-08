@@ -17,7 +17,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 public class MoneyReward extends Reward{
 	public static RewardType MONEY_REWARD = FTBQHandler.MONEY_REWARD;
-	public double amount = 0;
+	public double amount = 1;
 
 	public MoneyReward(Quest q) {
 		super(q);
