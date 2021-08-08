@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import dicemc.money.MoneyMod;
+import dicemc.money.MoneyMod.AcctTypes;
 import dicemc.money.api.IMoneyManager;
 import dicemc.money.setup.Config;
 import net.minecraft.nbt.CompoundTag;
@@ -36,6 +37,9 @@ public class MoneyWSD extends SavedData implements IMoneyManager{
 			if (id != null) {				
 				accounts.get(type).put(id, value);
 				this.setDirty();
+				if (Config.ENABLE_HISTORY.get()) {
+					
+				}
 				return true;
 			}
 		}
@@ -71,6 +75,10 @@ public class MoneyWSD extends SavedData implements IMoneyManager{
 		}
 		if (owner != null && !accounts.get(type).containsKey(owner)) {
 			accounts.get(type).put(owner, Config.STARTING_FUNDS.get());
+			if (Config.ENABLE_HISTORY.get()) 
+				MoneyMod.dbm.postEntry(System.currentTimeMillis(), DatabaseManager.NIL, AcctTypes.SERVER.key, "Server"
+						, owner, type, MoneyMod.dbm.server.getProfileCache().get(owner).getName()
+						, Config.STARTING_FUNDS.get(), "Starting Funds Deposit");
 			this.setDirty();
 		}
 	}
