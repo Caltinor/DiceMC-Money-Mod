@@ -10,12 +10,16 @@ import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
+import dicemc.money.MoneyMod;
 import dicemc.money.MoneyMod.AcctTypes;
 import dicemc.money.setup.Config;
+import dicemc.money.storage.DatabaseManager;
 import dicemc.money.storage.MoneyWSD;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.command.arguments.EntityArgument;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 
@@ -89,6 +93,15 @@ public class AccountCommandAdmin{
 		case "set": {
 			boolean result = wsd.setBalance(AcctTypes.PLAYER.key, pid, value);
 			if (result) {
+				if (Config.ENABLE_HISTORY.get()) {
+					boolean isPlayer = context.getSource().getEntity() instanceof ServerPlayerEntity;
+					UUID srcID = isPlayer ? context.getSource().getEntity().getUUID() : DatabaseManager.NIL;
+					ResourceLocation srcType = isPlayer? AcctTypes.PLAYER.key : AcctTypes.SERVER.key;
+					String srcName = isPlayer ? context.getSource().getServer().getProfileCache().get(srcID).getName() : "Console";
+					MoneyMod.dbm.postEntry(System.currentTimeMillis(), srcID, srcType, srcName
+							, pid, AcctTypes.PLAYER.key, MoneyMod.dbm.server.getProfileCache().get(pid).getName()
+							, value, "Admin Set Command");
+				}
 				context.getSource().sendSuccess(
 					new TranslationTextComponent("message.command.set.success", player.getName(), symbol+String.valueOf(value)), true);
 				return 0;
@@ -99,6 +112,15 @@ public class AccountCommandAdmin{
 		case "give": {
 			boolean result = wsd.changeBalance(AcctTypes.PLAYER.key, pid, value);
 			if (result) {
+				if (Config.ENABLE_HISTORY.get()) {
+					boolean isPlayer = context.getSource().getEntity() instanceof ServerPlayerEntity;
+					UUID srcID = isPlayer ? context.getSource().getEntity().getUUID() : DatabaseManager.NIL;
+					ResourceLocation srcType = isPlayer? AcctTypes.PLAYER.key : AcctTypes.SERVER.key;
+					String srcName = isPlayer ? context.getSource().getServer().getProfileCache().get(srcID).getName() : "Console";
+					MoneyMod.dbm.postEntry(System.currentTimeMillis(), srcID, srcType, srcName
+							, pid, AcctTypes.PLAYER.key, MoneyMod.dbm.server.getProfileCache().get(pid).getName()
+							, value, "Admin Give Command");
+				}
 				context.getSource().sendSuccess(
 					new TranslationTextComponent("message.command.give.success", symbol+String.valueOf(value), player.getName()), true);
 				return 0;
@@ -109,6 +131,15 @@ public class AccountCommandAdmin{
 		case "take": {
 			boolean result = wsd.changeBalance(AcctTypes.PLAYER.key, pid, -value);
 			if (result) {
+				if (Config.ENABLE_HISTORY.get()) {
+					boolean isPlayer = context.getSource().getEntity() instanceof ServerPlayerEntity;
+					UUID srcID = isPlayer ? context.getSource().getEntity().getUUID() : DatabaseManager.NIL;
+					ResourceLocation srcType = isPlayer? AcctTypes.PLAYER.key : AcctTypes.SERVER.key;
+					String srcName = isPlayer ? context.getSource().getServer().getProfileCache().get(srcID).getName() : "Console";
+					MoneyMod.dbm.postEntry(System.currentTimeMillis(), srcID, srcType, srcName
+							, pid, AcctTypes.PLAYER.key, MoneyMod.dbm.server.getProfileCache().get(pid).getName()
+							, value, "Admin Take Command");
+				}
 				context.getSource().sendSuccess(
 					new TranslationTextComponent("message.command.take.success", symbol+String.valueOf(value), player.getName()), true);
 				return 0;
@@ -167,6 +198,13 @@ public class AccountCommandAdmin{
 		}
 		boolean result = wsd.transferFunds(AcctTypes.PLAYER.key, fromplayer.getId(), AcctTypes.PLAYER.key, toplayer.getId(), value);
 		if (result) {
+			if (Config.ENABLE_HISTORY.get()) {
+				boolean isPlayer = context.getSource().getEntity() instanceof ServerPlayerEntity;
+				UUID srcID = isPlayer ? context.getSource().getEntity().getUUID() : DatabaseManager.NIL;
+				String srcName = isPlayer ? context.getSource().getServer().getProfileCache().get(srcID).getName() : "Console";
+				MoneyMod.dbm.postEntry(System.currentTimeMillis(), fromplayer.getId(), AcctTypes.PLAYER.key, fromplayer.getName()
+						, toplayer.getId(), AcctTypes.PLAYER.key, toplayer.getName(), value, "Admin Transfer Command Executed by: "+ srcName);
+			}
 			context.getSource().sendSuccess(
 				new TranslationTextComponent("message.command.transfer.success", symbol+String.valueOf(value), toplayer.getName()), true);
 			return 0;

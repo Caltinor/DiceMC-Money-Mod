@@ -10,7 +10,9 @@ import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
+import dicemc.money.MoneyMod;
 import dicemc.money.MoneyMod.AcctTypes;
+import dicemc.money.setup.Config;
 import dicemc.money.storage.MoneyWSD;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
@@ -35,8 +37,14 @@ private static final AccountCommandTransfer CMD = new AccountCommandTransfer();
 		ServerWorld world = context.getSource().getServer().overworld();
 		double value = DoubleArgumentType.getDouble(context, "value");
 		UUID recipient = context.getSource().getServer().getProfileCache().get(StringArgumentType.getString(context, "recipient")).getId();
-		if (MoneyWSD.get(world).transferFunds(AcctTypes.PLAYER.key, player.getUUID(), AcctTypes.PLAYER.key, recipient, value))
+		if (MoneyWSD.get(world).transferFunds(AcctTypes.PLAYER.key, player.getUUID(), AcctTypes.PLAYER.key, recipient, value)) {
+			if (Config.ENABLE_HISTORY.get()) {
+				MoneyMod.dbm.postEntry(System.currentTimeMillis(), player.getUUID(), AcctTypes.PLAYER.key, player.getName().getContents()
+						, recipient, AcctTypes.PLAYER.key, context.getSource().getServer().getProfileCache().get(recipient).getName()
+						, value, "Player Transfer Command. From is who executed");
+			}
 			context.getSource().sendSuccess(new TranslationTextComponent("message.command.transfer.success", Math.abs(value), StringArgumentType.getString(context, "recipient")), true);
+		}
 		else 
 			context.getSource().sendSuccess(new TranslationTextComponent("message.command.transfer.failure"), false);
 		return 0;
