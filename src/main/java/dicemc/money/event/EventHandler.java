@@ -224,7 +224,6 @@ public class EventHandler {
 				StringTextComponent newPrice = new StringTextComponent(Config.CURRENCY_SYMBOL.get()+String.valueOf(price));
 				newPrice.withStyle(TextFormatting.GOLD);
 				tile.setMessage(3, newPrice);
-				System.out.println(actionEntry.getContents());
 				switch (actionEntry.getContents()) {
 				case "[buy]": {tile.getTileData().putString("shop-type", "buy"); break;}
 				case "[sell]": {tile.getTileData().putString("shop-type", "sell");break;}

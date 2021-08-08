@@ -44,10 +44,8 @@ public class MoneyMod {
 	@SubscribeEvent 
 	public void onServerStart(FMLServerStartingEvent event ) {
 		MoneyManager.get().setWorld(event.getServer().overworld());
-		System.out.println(event.getServer().getWorldData().toString());
 		if (Config.ENABLE_HISTORY.get()) {
-			String worldname = getWorldName(event.getServer().getWorldData().toString());
-			System.out.println(worldname);
+			String worldname = getWorldName(event.getServer().getWorldData().getLevelName());
 			String urlIn = event.getServer().getServerDirectory().getAbsolutePath() + "\\saves\\" + worldname +"\\";
 			dbm = new DatabaseManager(worldname, urlIn);
 		}
@@ -73,7 +71,7 @@ public class MoneyMod {
 	
 	private static String getWorldName(String raw) {
 		int start = raw.indexOf("[")+1;
-		int end = raw.length()-1;
+		int end = raw.contains("]") ? raw.length()-1 : raw.length();
 		start = (start >= 0 && start < end) ? start : 0;
 		end = (end >= 0) ? end : 0;
 		return raw.substring(start, end);

@@ -20,7 +20,7 @@ public class DatabaseManager {
 	
 	public DatabaseManager(String saveName, String urlIn) {
 		String port = "";
-		String name = saveName + "transaction_history";
+		String name = saveName + "_transaction_history";
 		String service = "h2";
 		String host = "jdbc:"+service+":" + urlIn + port + name;;
 		String user = "sa";
@@ -33,7 +33,7 @@ public class DatabaseManager {
 			System.out.println("DB Connection Successful");
 			stmt.execute("CREATE TABLE IF NOT EXISTS History (" +
 					"ID INT AUTO_INCREMENT PRIMARY KEY, " +
-					"DTG BIGINT NOT NULL" +
+					"DTG BIGINT NOT NULL, " +
 					"FROM_ID UUID NOT NULL, " +
 					"FROM_TYPE VARCHAR NOT NULL, " +
 					"FROM_NAME VARCHAR NOT NULL, " +
