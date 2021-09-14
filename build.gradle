@@ -18,6 +18,7 @@ repositories {
     maven {
         url "https://www.cursemaven.com"
     }
+
 }
 
 version = '2.0.9'
@@ -73,16 +74,18 @@ minecraft {
 
 dependencies {
     minecraft 'net.minecraftforge:forge:1.16.5-36.2.0'
-    implementation files("C:/MinecraftModding/1-16-2/h2-1.4.200.jar")
+    // https://mvnrepository.com/artifact/com.h2database/h2
+	//compile 'com.h2database:h2:1.4.200'
+
     
-    compileOnly fg.deobf("curse.maven:ftbquests-289412:3385407")
-    runtimeOnly fg.deobf("curse.maven:ftbquests-289412:3385407")
-    compileOnly fg.deobf("curse.maven:ftbguilibrary-404465:3373833")
-    runtimeOnly fg.deobf("curse.maven:ftbguilibrary-404465:3373833")
+    compileOnly fg.deobf("curse.maven:ftbquests-289412:3458486")
+    runtimeOnly fg.deobf("curse.maven:ftbquests-289412:3458486")
+    compileOnly fg.deobf("curse.maven:ftbguilibrary-404465:3456644")
+    runtimeOnly fg.deobf("curse.maven:ftbguilibrary-404465:3456644")
     compileOnly fg.deobf("curse.maven:itemfilters-309674:3376819")
     runtimeOnly fg.deobf("curse.maven:itemfilters-309674:3376819")
-    compileOnly fg.deobf("curse.maven:ftbteams-forge-404468:3373835")
-    runtimeOnly fg.deobf("curse.maven:ftbteams-forge-404468:3373835")
+    compileOnly fg.deobf("curse.maven:ftbteams-forge-404468:3458173")
+    runtimeOnly fg.deobf("curse.maven:ftbteams-forge-404468:3458173")
     compileOnly fg.deobf("curse.maven:architecturyforge-419699:3385660")
     runtimeOnly fg.deobf("curse.maven:architecturyforge-419699:3385660")
 }

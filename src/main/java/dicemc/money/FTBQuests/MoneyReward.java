@@ -4,10 +4,8 @@ import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.reward.RewardType;
-import dicemc.money.MoneyMod;
 import dicemc.money.MoneyMod.AcctTypes;
 import dicemc.money.setup.Config;
-import dicemc.money.storage.DatabaseManager;
 import dicemc.money.storage.MoneyWSD;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
@@ -31,11 +29,11 @@ public class MoneyReward extends Reward{
 	@Override
 	public void claim(ServerPlayerEntity player, boolean bool) {
 		MoneyWSD.get(player.getServer().overworld()).changeBalance(AcctTypes.PLAYER.key, player.getUUID(), amount);
-		if (Config.ENABLE_HISTORY.get()) {
+		/*if (Config.ENABLE_HISTORY.get()) {
 			MoneyMod.dbm.postEntry(System.currentTimeMillis(), DatabaseManager.NIL, AcctTypes.SERVER.key, "Server"
 					, player.getUUID(), AcctTypes.PLAYER.key, player.getName().getContents()
 					, amount, "Quest Claim Reward");
-		}
+		}*/
 	}
 	
 	@Override

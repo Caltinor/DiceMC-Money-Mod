@@ -18,7 +18,7 @@ public class Config {
 	public static ForgeConfigSpec.ConfigValue<Integer> SHOP_LEVEL;
 	public static ForgeConfigSpec.ConfigValue<Double> LOSS_ON_DEATH;
 	public static ForgeConfigSpec.ConfigValue<Integer>	TOP_SIZE;
-	public static ForgeConfigSpec.ConfigValue<Boolean> ENABLE_HISTORY;
+	//public static ForgeConfigSpec.ConfigValue<Boolean> ENABLE_HISTORY;
 	
 	static {
 		ForgeConfigSpec.Builder SERVER_BUILDER = new ForgeConfigSpec.Builder();
@@ -45,10 +45,10 @@ public class Config {
 				.defineInRange("loss on death", 0d, 0d, 1d);
 		TOP_SIZE = builder.comment("The number of players to be displayed when the top command is used.  set to zero to disable")
 				.define("top size", 3);
-		ENABLE_HISTORY = builder.comment("This setting turns enables transactions to be recorded using the H2 embedded database system."
-				, "leaving this disabled will prevent the creation of the database.  It is recommended that"
-				, "you use an application like DBeaver to view and query your data.")
-				.define("enable_history", false);
+		//ENABLE_HISTORY = builder.comment("This setting turns enables transactions to be recorded using the H2 embedded database system."
+		//		, "leaving this disabled will prevent the creation of the database.  It is recommended that"
+		//		, "you use an application like DBeaver to view and query your data.")
+		//		.define("enable_history", false);
 		
 		builder.pop();		
 	}

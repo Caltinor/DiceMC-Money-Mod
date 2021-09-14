@@ -12,7 +12,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dicemc.money.MoneyMod;
 import dicemc.money.MoneyMod.AcctTypes;
 import dicemc.money.setup.Config;
-import dicemc.money.storage.DatabaseManager;
 import dicemc.money.storage.MoneyWSD;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.WallSignBlock;
@@ -73,11 +72,11 @@ public class EventHandler {
 			double loss = balp * Config.LOSS_ON_DEATH.get();
 			if (loss > 0) {
 				MoneyWSD.get(player.getServer().overworld()).changeBalance(AcctTypes.PLAYER.key, player.getUUID(), -loss);
-				if (Config.ENABLE_HISTORY.get()) {
+				/*if (Config.ENABLE_HISTORY.get()) {
 					MoneyMod.dbm.postEntry(System.currentTimeMillis(), DatabaseManager.NIL, AcctTypes.SERVER.key, "Server"
 							, player.getUUID(), AcctTypes.PLAYER.key, player.getName().getContents()
 							, -loss, "Loss on Death Event");
-				}
+				}*/
 				player.sendMessage(new TranslationTextComponent("message.death", loss), player.getUUID());
 			}
 		}
@@ -203,7 +202,9 @@ public class EventHandler {
 		if (actionEntry.getContents().equalsIgnoreCase("[buy]")
 				|| actionEntry.getContents().equalsIgnoreCase("[sell]")
 				|| actionEntry.getContents().equalsIgnoreCase("[server-buy]")
-				|| actionEntry.getContents().equalsIgnoreCase("[server-sell]")) {
+				|| actionEntry.getContents().equalsIgnoreCase("[server-sell]")
+				|| actionEntry.getContents().equalsIgnoreCase("[buy-from-server]")
+				|| actionEntry.getContents().equalsIgnoreCase("[sell-to-server]")) {
 			//second confirm the price value is valid
 			if (actionEntry.getContents().equalsIgnoreCase("[server-buy]") || actionEntry.getContents().equalsIgnoreCase("[server-sell]")) {
 				if (!player.hasPermissions(Config.ADMIN_LEVEL.get())) {
@@ -367,13 +368,13 @@ public class EventHandler {
 			//If so, process transfer of items and funds.			
 			UUID shopOwner = nbt.getUUID("owner");
 			wsd.transferFunds(AcctTypes.PLAYER.key, player.getUUID(), AcctTypes.PLAYER.key, shopOwner, value);
-			if (Config.ENABLE_HISTORY.get()) {
+			/*if (Config.ENABLE_HISTORY.get()) {
 				String itemPrint = "";
 				itemsList.forEach((a) -> {itemPrint.concat(a.getAsString());});
 				MoneyMod.dbm.postEntry(System.currentTimeMillis(), player.getUUID(), AcctTypes.PLAYER.key, player.getName().getContents()
 						, shopOwner, AcctTypes.PLAYER.key, player.getServer().getProfileCache().get(shopOwner).getName()
 						, value, itemsList.getAsString());
-			}
+			}*/
 			inv.ifPresent((p) -> {
 				for (Map.Entry<Integer, ItemStack> map : slotMap.entrySet()) {
 					player.inventory.add(p.extractItem(map.getKey(), map.getValue().getCount(), false));
@@ -450,13 +451,13 @@ public class EventHandler {
 			}
 			//Process Transfers now that reqs have been met
 			wsd.transferFunds(AcctTypes.PLAYER.key, shopOwner, AcctTypes.PLAYER.key, player.getUUID(), value);
-			if (Config.ENABLE_HISTORY.get()) {
+			/*if (Config.ENABLE_HISTORY.get()) {
 				String itemPrint = "";
 				itemsList.forEach((a) -> {itemPrint.concat(a.getAsString());});
 				MoneyMod.dbm.postEntry(System.currentTimeMillis(), shopOwner, AcctTypes.PLAYER.key, player.getServer().getProfileCache().get(shopOwner).getName()
 						, player.getUUID(), AcctTypes.PLAYER.key, player.getName().getContents()
 						, value, itemsList.getAsString());
-			}
+			}*/
 			for (Map.Entry<Integer, ItemStack> pSlots : slotMap.entrySet()) {
 				player.inventory.removeItem(pSlots.getKey(), pSlots.getValue().getCount());
 			}
@@ -479,13 +480,13 @@ public class EventHandler {
 				return;
 			}
 			wsd.changeBalance(AcctTypes.PLAYER.key, player.getUUID(), -value);
-			if (Config.ENABLE_HISTORY.get()) {
+			/*if (Config.ENABLE_HISTORY.get()) {
 				String itemPrint = "";
 				itemsList.forEach((a) -> {itemPrint.concat(a.getAsString());});
 				MoneyMod.dbm.postEntry(System.currentTimeMillis(), DatabaseManager.NIL, AcctTypes.SERVER.key, "Server"
 						, player.getUUID(), AcctTypes.PLAYER.key, player.getName().getContents()
 						, -value, itemsList.getAsString());
-			}
+			}*/
 			for (int i = 0; i < transItems.size(); i++) {
 				player.inventory.add(transItems.get(i).copy());
 			}
@@ -520,13 +521,13 @@ public class EventHandler {
 				
 			}
 			wsd.changeBalance(AcctTypes.PLAYER.key, player.getUUID(), value);
-			if (Config.ENABLE_HISTORY.get()) {
+			/*if (Config.ENABLE_HISTORY.get()) {
 				String itemPrint = "";
 				itemsList.forEach((a) -> {itemPrint.concat(a.getAsString());});
 				MoneyMod.dbm.postEntry(System.currentTimeMillis(), DatabaseManager.NIL, AcctTypes.SERVER.key, "Server"
 						, player.getUUID(), AcctTypes.PLAYER.key, player.getName().getContents()
 						, value, itemsList.getAsString());
-			}
+			}*/
 			for (Map.Entry<Integer, ItemStack> pSlots : slotMap.entrySet()) {
 				player.inventory.getItem(pSlots.getKey()).shrink(pSlots.getValue().getCount());
 			}

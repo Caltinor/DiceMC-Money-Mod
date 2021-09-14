@@ -12,7 +12,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ResourceLocation;
 
 public class DatabaseManager {
-	public Connection con;
+	/*public Connection con;
 	public MinecraftServer server;
 	public static UUID NIL = UUID.fromString("00000000-0000-0000-0000-000000000000");
 	
@@ -74,5 +74,5 @@ public class DatabaseManager {
 		try {return sql.executeUpdate();
 		} catch (SQLException e) {e.printStackTrace();}
 		return 0;
-	}
+	}*/
 }
