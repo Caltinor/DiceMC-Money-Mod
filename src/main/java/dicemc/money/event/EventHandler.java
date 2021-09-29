@@ -324,9 +324,23 @@ public class EventHandler {
 		CompoundNBT nbt = sign.getTileData();
 		LazyOptional<IItemHandler> inv = tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY);
 		List<ItemStack> transItems = new ArrayList<>();
+		Map<ItemStack, ItemStack> consolidatedItems = new HashMap<>();
 		ListNBT itemsList = nbt.getList("items", NBT.TAG_COMPOUND);
 		for (int i = 0; i < itemsList.size(); i++) {
-			transItems.add(ItemStack.of(itemsList.getCompound(i)));
+			ItemStack srcStack = ItemStack.of(itemsList.getCompound(i));
+			ItemStack keyStack = srcStack.copy();
+			keyStack.setCount(1);
+			boolean hasEntry = false;
+			for (Map.Entry<ItemStack, ItemStack> map : consolidatedItems.entrySet()) {
+				if (map.getKey().sameItem(srcStack) && ItemStack.tagMatches(map.getKey(), srcStack)) {
+					map.getValue().grow(srcStack.getCount());
+					hasEntry = true;
+				}
+			}
+			if (!hasEntry) consolidatedItems.put(keyStack, srcStack);
+		}
+		for (Map.Entry<ItemStack, ItemStack> map : consolidatedItems.entrySet()) {
+			transItems.add(map.getValue());
 		}
 		//ItemStack transItem = ItemStack.of(nbt.getCompound("item"));
 		String action = nbt.getString("shop-type");
@@ -342,7 +356,7 @@ public class EventHandler {
 			Map<Integer, ItemStack> slotMap = new HashMap<>();
 			for (int tf = 0; tf < transItems.size(); tf++) {
 				int[] stackSize = {transItems.get(tf).getCount()};
-				final Integer t = new Integer(tf);
+				final Integer t = Integer.valueOf(tf);
 				Optional<Boolean> test = inv.map((p) -> {
 					for (int i = 0; i < p.getSlots(); i++) {
 						ItemStack inSlot = ItemStack.EMPTY;
