@@ -323,9 +323,23 @@ public class EventHandler {
 		CompoundTag nbt = sign.getTileData();
 		LazyOptional<IItemHandler> inv = tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY);
 		List<ItemStack> transItems = new ArrayList<>();
+		Map<ItemStack, ItemStack> consolidatedItems = new HashMap<>();
 		ListTag itemsList = nbt.getList("items", NBT.TAG_COMPOUND);
 		for (int i = 0; i < itemsList.size(); i++) {
-			transItems.add(ItemStack.of(itemsList.getCompound(i)));
+			ItemStack srcStack = ItemStack.of(itemsList.getCompound(i));
+			ItemStack keyStack = srcStack.copy();
+			keyStack.setCount(1);
+			boolean hasEntry = false;
+			for (Map.Entry<ItemStack, ItemStack> map : consolidatedItems.entrySet()) {
+				if (map.getKey().sameItem(srcStack) && ItemStack.tagMatches(map.getKey(), srcStack)) {
+					map.getValue().grow(srcStack.getCount());
+					hasEntry = true;
+				}
+			}
+			if (!hasEntry) consolidatedItems.put(keyStack, srcStack);
+		}
+		for (Map.Entry<ItemStack, ItemStack> map : consolidatedItems.entrySet()) {
+			transItems.add(map.getValue());
 		}
 		//ItemStack transItem = ItemStack.of(nbt.getCompound("item"));
 		String action = nbt.getString("shop-type");
