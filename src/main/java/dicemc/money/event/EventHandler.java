@@ -40,6 +40,8 @@ import net.minecraftforge.event.entity.player.PlayerInteractEvent.LeftClickBlock
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickBlock;
 import net.minecraftforge.event.world.BlockEvent.BreakEvent;
 import net.minecraftforge.event.world.BlockEvent.EntityPlaceEvent;
+import net.minecraftforge.eventbus.api.Event.Result;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.items.CapabilityItemHandler;
@@ -165,7 +167,7 @@ public class EventHandler {
 	}
 	
 	@SuppressWarnings({ "resource", "static-access" })
-	@SubscribeEvent
+	@SubscribeEvent(priority=EventPriority.HIGHEST)
 	public static void onSignRightClick(RightClickBlock event) {
 		if (!event.getWorld().isClientSide && event.getWorld().getBlockState(event.getPos()).getBlock() instanceof WallSignBlock) {
 			BlockState state = event.getWorld().getBlockState(event.getPos());
@@ -177,15 +179,19 @@ public class EventHandler {
 					SignTileEntity tile = (SignTileEntity) event.getWorld().getBlockEntity(event.getPos());
 					CompoundNBT nbt = tile.serializeNBT();
 					if (!nbt.contains("ForgeData") || !nbt.getCompound("ForgeData").contains("shop-activated")) {
-						activateShop(invTile, tile, event.getWorld(), event.getPos(), nbt, event.getPlayer());				
+						if (activateShop(invTile, tile, event.getWorld(), event.getPos(), nbt, event.getPlayer()))
+							event.setUseBlock(Result.DENY);
 					}
-					else processTransaction(invTile, tile, event.getPlayer());
+					else {
+						processTransaction(invTile, tile, event.getPlayer());
+						event.setUseBlock(Result.DENY);
+					}
 				}
 			}
 		}
 	}
 	
-	private static void activateShop(TileEntity storage, SignTileEntity tile, World world, BlockPos pos, CompoundNBT nbt, PlayerEntity player) {
+	private static boolean activateShop(TileEntity storage, SignTileEntity tile, World world, BlockPos pos, CompoundNBT nbt, PlayerEntity player) {
 		ITextComponent actionEntry = ITextComponent.Serializer.fromJson(nbt.getString("Text1"));
 		ITextComponent priceEntry  = ITextComponent.Serializer.fromJson(nbt.getString("Text4"));
 		//check if the storage block has an item in the first slot
@@ -197,7 +203,7 @@ public class EventHandler {
 			}	
 			return ItemStack.EMPTY;
 		}).orElse(ItemStack.EMPTY);
-		if (srcStack.equals(ItemStack.EMPTY, true)) return;
+		if (srcStack.equals(ItemStack.EMPTY, true)) return false;
 		//first confirm the action type is valid
 		if (actionEntry.getContents().equalsIgnoreCase("[buy]")
 				|| actionEntry.getContents().equalsIgnoreCase("[sell]")
@@ -209,12 +215,12 @@ public class EventHandler {
 			if (actionEntry.getContents().equalsIgnoreCase("[server-buy]") || actionEntry.getContents().equalsIgnoreCase("[server-sell]")) {
 				if (!player.hasPermissions(Config.ADMIN_LEVEL.get())) {
 					player.sendMessage(new TranslationTextComponent("message.activate.failure.admin"), player.getUUID());
-					return;
+					return false;
 				}
 			}
 			else if (!player.hasPermissions(Config.SHOP_LEVEL.get())) {
 				player.sendMessage(new TranslationTextComponent("message.activate.failure.admin"), player.getUUID());
-				return;
+				return false;
 			}
 			try {
 				double price = Math.abs(Double.valueOf(priceEntry.getString()));
@@ -253,12 +259,14 @@ public class EventHandler {
 				storage.save(new CompoundNBT());
 				BlockState state = world.getBlockState(pos);
 				world.sendBlockUpdated(pos, state, state, BlockFlags.DEFAULT_AND_RERENDER);
+				return true;
 			}
 			catch(NumberFormatException e) {
 				player.sendMessage(new TranslationTextComponent("message.activate.failure.money"), player.getUUID());
 				world.destroyBlock(pos, true, player);
 			}
 		}
+		return false;
 	}
 	
 	private static CompoundNBT getItemFromBook(ItemStack stack) {
