@@ -10,10 +10,10 @@ import dicemc.money.api.IMoneyManager;
 import dicemc.money.setup.Config;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.saveddata.SavedData;
-import net.minecraftforge.common.util.Constants.NBT;
 
 public class MoneyWSD extends SavedData implements IMoneyManager{
 	private static final String DATA_NAME = MoneyMod.MOD_ID + "_data";
@@ -84,12 +84,12 @@ public class MoneyWSD extends SavedData implements IMoneyManager{
 	}
 
 	public void load(CompoundTag nbt) {
-		ListTag baseList = nbt.getList("types", NBT.TAG_COMPOUND);
+		ListTag baseList = nbt.getList("types", Tag.TAG_COMPOUND);
 		for (int b = 0; b < baseList.size(); b++) {
 			CompoundTag entry = baseList.getCompound(b);
 			ResourceLocation res = new ResourceLocation(entry.getString("type"));
 			Map<UUID, Double> data = new HashMap<>();
-			ListTag list = entry.getList("data", NBT.TAG_COMPOUND);
+			ListTag list = entry.getList("data", Tag.TAG_COMPOUND);
 			for (int i = 0; i < list.size(); i++) {
 				CompoundTag snbt = list.getCompound(i);
 				UUID id = snbt.getUUID("id");

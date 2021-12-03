@@ -15,6 +15,7 @@ import dicemc.money.setup.Config;
 import dicemc.money.storage.DatabaseManager;
 import dicemc.money.storage.MoneyWSD;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.WallSignBlock;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.server.level.ServerPlayer;
@@ -23,6 +24,7 @@ import net.minecraft.world.item.WritableBookItem;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.core.Direction;
@@ -33,8 +35,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.common.util.Constants.BlockFlags;
-import net.minecraftforge.common.util.Constants.NBT;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent;
@@ -177,7 +177,7 @@ public class EventHandler {
 				BlockEntity invTile = event.getWorld().getBlockEntity(backBlock);
 				if (invTile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).isPresent()) {
 					SignBlockEntity tile = (SignBlockEntity) event.getWorld().getBlockEntity(event.getPos());
-					CompoundTag nbt = tile.serializeNBT();
+					CompoundTag nbt = tile.saveWithFullMetadata();
 					if (!nbt.contains("ForgeData") || !nbt.getCompound("ForgeData").contains("shop-activated")) {
 						if (activateShop(invTile, tile, event.getWorld(), event.getPos(), nbt, event.getPlayer()))
 							event.setUseBlock(Result.DENY);
@@ -256,7 +256,7 @@ public class EventHandler {
 				storage.getTileData().putUUID("owner", player.getUUID());
 				storage.save(new CompoundTag());
 				BlockState state = world.getBlockState(pos);
-				world.sendBlockUpdated(pos, state, state, BlockFlags.DEFAULT_AND_RERENDER);
+				world.sendBlockUpdated(pos, state, state, Block.UPDATE_CLIENTS);
 				return true;
 			}
 			catch(NumberFormatException e) {
@@ -270,7 +270,7 @@ public class EventHandler {
 	private static CompoundTag getItemFromBook(ItemStack stack) {
 		CompoundTag nbt = stack.getTag();
 		if (nbt.isEmpty()) return stack.serializeNBT();
-		String page = nbt.getList("pages", NBT.TAG_STRING).get(0).getAsString();
+		String page = nbt.getList("pages", Tag.TAG_STRING).get(0).getAsString();
 		if (page.substring(0, 7).equalsIgnoreCase("vending")) {
 			String subStr = page.substring(8);
 			try {
@@ -288,7 +288,7 @@ public class EventHandler {
 		String type = nbt.getString("shop-type");
 		boolean isBuy = type.equalsIgnoreCase("buy") || type.equalsIgnoreCase("server-buy");
 		List<ItemStack> transItems = new ArrayList<>();
-		ListTag itemsList = nbt.getList("items", NBT.TAG_COMPOUND);
+		ListTag itemsList = nbt.getList("items", Tag.TAG_COMPOUND);
 		for (int i = 0; i < itemsList.size(); i++) {
 			transItems.add(ItemStack.of(itemsList.getCompound(i)));
 		}
@@ -331,7 +331,7 @@ public class EventHandler {
 		LazyOptional<IItemHandler> inv = tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY);
 		List<ItemStack> transItems = new ArrayList<>();
 		Map<ItemStack, ItemStack> consolidatedItems = new HashMap<>();
-		ListTag itemsList = nbt.getList("items", NBT.TAG_COMPOUND);
+		ListTag itemsList = nbt.getList("items", Tag.TAG_COMPOUND);
 		for (int i = 0; i < itemsList.size(); i++) {
 			ItemStack srcStack = ItemStack.of(itemsList.getCompound(i));
 			ItemStack keyStack = srcStack.copy();

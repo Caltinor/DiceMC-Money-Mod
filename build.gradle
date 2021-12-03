@@ -13,7 +13,6 @@ buildscript {
 apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
-apply from: 'https://raw.githubusercontent.com/SizableShrimp/Forge-Class-Remapper/main/classremapper.gradle'
 
 repositories {
     maven {
@@ -21,15 +20,15 @@ repositories {
     }
 }
 
-version = '1.17-2.0.12'
+version = '1.18-2.0.12'
 group = 'dicemc.money' 
 archivesBaseName = 'DiceMC Money'
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(16)
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
 minecraft {
-    mappings channel: 'official', version: '1.17.1'
+    mappings channel: 'official', version: '1.18'
 
     runs {
         client {
@@ -73,8 +72,8 @@ minecraft {
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.17.1-37.0.82'
-    implementation files("C:/MinecraftModding/1-16-2/h2-1.4.200.jar") 
+    minecraft 'net.minecraftforge:forge:1.18-38.0.12'
+    //implementation files("C:/MinecraftModding/1-16-2/h2-1.4.200.jar") 
     
     //compileOnly fg.deobf("curse.maven:ftbquests-289412:3385407")
     //runtimeOnly fg.deobf("curse.maven:ftbquests-289412:3385407")

@@ -10,6 +10,7 @@ import dicemc.money.storage.DatabaseManager;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
+import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -17,7 +18,6 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fmlserverevents.FMLServerStartingEvent;
 
 @Mod(MoneyMod.MOD_ID)
 public class MoneyMod {
@@ -42,7 +42,7 @@ public class MoneyMod {
 	}
 	
 	@SubscribeEvent 
-	public void onServerStart(FMLServerStartingEvent event ) {
+	public void onServerStart(ServerStartingEvent event ) {
 		MoneyManager.get().setWorld(event.getServer().overworld());
 		if (Config.ENABLE_HISTORY.get()) {
 			String worldname = getWorldName(event.getServer().getWorldData().getLevelName());
