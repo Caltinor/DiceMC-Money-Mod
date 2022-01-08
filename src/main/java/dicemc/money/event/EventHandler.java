@@ -397,7 +397,7 @@ public class EventHandler {
 			}
 			inv.ifPresent((p) -> {
 				for (Map.Entry<Integer, ItemStack> map : slotMap.entrySet()) {
-					player.getInventory().add(p.extractItem(map.getKey(), map.getValue().getCount(), false));
+					player.drop(p.extractItem(map.getKey(), map.getValue().getCount(), false), false);
 				}
 			});
 			TranslatableComponent msg =  new TranslatableComponent("message.shop.buy.success"
@@ -508,7 +508,7 @@ public class EventHandler {
 						, -value, itemsList.getAsString());
 			}
 			for (int i = 0; i < transItems.size(); i++) {
-				player.getInventory().add(transItems.get(i).copy());
+				player.drop(transItems.get(i).copy(), false);
 			}
 			player.sendMessage(new TranslatableComponent("message.shop.buy.success"
 					, getTransItemsDisplayString(transItems), Config.CURRENCY_SYMBOL.get()+String.valueOf(value)
