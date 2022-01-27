@@ -269,7 +269,7 @@ public class EventHandler {
 	
 	private static CompoundTag getItemFromBook(ItemStack stack) {
 		CompoundTag nbt = stack.getTag();
-		if (nbt.isEmpty()) return stack.serializeNBT();
+		if (nbt == null || nbt.isEmpty()) return stack.serializeNBT();
 		String page = nbt.getList("pages", Tag.TAG_STRING).get(0).getAsString();
 		if (page.substring(0, 7).equalsIgnoreCase("vending")) {
 			String subStr = page.substring(8);
