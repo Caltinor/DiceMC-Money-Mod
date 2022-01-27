@@ -250,11 +250,11 @@ public class EventHandler {
 					}
 				});
 				tile.getTileData().put("items", lnbt);
-				tile.save(nbt);
+				tile.saveWithFullMetadata();
 				tile.setChanged();
 				storage.getTileData().putBoolean("is-shop", true);
 				storage.getTileData().putUUID("owner", player.getUUID());
-				storage.save(new CompoundTag());
+				storage.saveWithFullMetadata();
 				BlockState state = world.getBlockState(pos);
 				world.sendBlockUpdated(pos, state, state, Block.UPDATE_CLIENTS);
 				return true;
@@ -397,7 +397,9 @@ public class EventHandler {
 			}
 			inv.ifPresent((p) -> {
 				for (Map.Entry<Integer, ItemStack> map : slotMap.entrySet()) {
-					player.drop(p.extractItem(map.getKey(), map.getValue().getCount(), false), false);
+					ItemStack pStack = p.extractItem(map.getKey(), map.getValue().getCount(), false);
+					if (!player.addItem(pStack))
+						player.drop(pStack, false);
 				}
 			});
 			TranslatableComponent msg =  new TranslatableComponent("message.shop.buy.success"
@@ -508,7 +510,9 @@ public class EventHandler {
 						, -value, itemsList.getAsString());
 			}
 			for (int i = 0; i < transItems.size(); i++) {
-				player.drop(transItems.get(i).copy(), false);
+				ItemStack pStack = transItems.get(i).copy();
+				if (!player.addItem(pStack))
+					player.drop(pStack, false);
 			}
 			player.sendMessage(new TranslatableComponent("message.shop.buy.success"
 					, getTransItemsDisplayString(transItems), Config.CURRENCY_SYMBOL.get()+String.valueOf(value)
