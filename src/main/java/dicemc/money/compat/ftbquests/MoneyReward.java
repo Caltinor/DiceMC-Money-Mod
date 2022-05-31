@@ -1,4 +1,4 @@
-package dicemc.money.FTBQuests;
+package dicemc.money.compat.ftbquests;
 
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftbquests.quest.Quest;

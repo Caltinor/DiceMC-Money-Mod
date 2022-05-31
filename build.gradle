@@ -85,6 +85,9 @@ dependencies {
     //runtimeOnly fg.deobf("curse.maven:ftbteams-forge-404468:3725501")
     compileOnly fg.deobf("curse.maven:architecturyforge-419699:3728618")
     //runtimeOnly fg.deobf("curse.maven:architecturyforge-419699:3728618")
+	
+	compileOnly fg.deobf('com.matyrobbrt.mc.sectionprotection:sectionprotection-1.18.2-api:0.8.0')
+	// runtimeOnly fg.deobf('com.matyrobbrt.mc.sectionprotection:sectionprotection-1.18.2:0.8.0')
 }
 
 jar {
