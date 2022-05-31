@@ -20,7 +20,7 @@ repositories {
     }
 }
 
-version = '1.18.2-2.0.15'
+version = '1.18.2-2.0.16'
 group = 'dicemc.money' 
 archivesBaseName = 'DiceMC Money'
 
