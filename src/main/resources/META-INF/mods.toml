@@ -28,3 +28,9 @@ A server side money mod with sign-shops.
     versionRange="[1.18.2,1.19)"
     ordering="NONE"
     side="BOTH"
+[[dependencies.dicemcmm]]
+    modId="sectionprotection"
+    mandatory=false
+    versionRange="[0.8.0,)"
+    ordering="NONE"
+    side="SERVER

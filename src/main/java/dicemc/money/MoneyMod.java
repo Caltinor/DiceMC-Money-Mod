@@ -1,10 +1,12 @@
 package dicemc.money;
 
-import dicemc.money.FTBQuests.FTBQHandler;
+import com.mojang.logging.LogUtils;
 import dicemc.money.api.MoneyManager;
 import dicemc.money.commands.AccountCommandRoot;
 import dicemc.money.commands.AccountCommandTop;
 import dicemc.money.commands.ShopCommandBuilder;
+import dicemc.money.compat.SectionProtectionCompat;
+import dicemc.money.compat.ftbquests.FTBQHandler;
 import dicemc.money.setup.Config;
 import dicemc.money.storage.DatabaseManager;
 import net.minecraft.resources.ResourceLocation;
@@ -18,10 +20,12 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import org.slf4j.Logger;
 
 @Mod(MoneyMod.MOD_ID)
 public class MoneyMod {
 	public static final String MOD_ID = "dicemcmm";
+	public static final Logger LOGGER = LogUtils.getLogger();
 	public static DatabaseManager dbm;
 	
 	public MoneyMod() {		
@@ -29,10 +33,10 @@ public class MoneyMod {
 		
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::commonSetup);
 		
-		if( ModList.get().isLoaded( "ftbquests" ) )
-        {
-            FTBQHandler.init();
-        }
+		if (ModList.get().isLoaded( "ftbquests" ))
+        	FTBQHandler.init();
+		if (ModList.get().isLoaded("sectionprotection"))
+			SectionProtectionCompat.init();
 		
 		MinecraftForge.EVENT_BUS.register(this);
 	}
