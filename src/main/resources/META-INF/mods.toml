@@ -33,4 +33,4 @@ A server side money mod with sign-shops.
     mandatory=false
     versionRange="[0.8.0,)"
     ordering="NONE"
-    side="SERVER
+    side="SERVER"
