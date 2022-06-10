@@ -18,8 +18,7 @@ import dicemc.money.setup.Config;
 import dicemc.money.storage.MoneyWSD;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 
 public class AccountCommandTop implements Command<CommandSourceStack>{
 	private static final AccountCommandTop CMD = new AccountCommandTop();
@@ -41,11 +40,11 @@ public class AccountCommandTop implements Command<CommandSourceStack>{
 		int limit = sorted.size() > Config.TOP_SIZE.get() ? Config.TOP_SIZE.get() : sorted.size();
 		
 		String tkey = limit == 1 ? "message.command.top1" : "message.command.top";
-		context.getSource().sendSuccess(new TranslatableComponent(tkey, limit), false);
+		context.getSource().sendSuccess(Component.translatable(tkey, limit), false);
 		for (int i = 0; i < limit; i++) {
 			Pair<UUID, Double> p = sorted.get(i);
 			String name = context.getSource().getServer().getProfileCache().get(p.getFirst()).get().getName();
-			context.getSource().sendSuccess(new TextComponent("#"+(i+1)+" "+name+": "+Config.CURRENCY_SYMBOL.get()+df.format(p.getSecond())), false);
+			context.getSource().sendSuccess(Component.literal("#"+(i+1)+" "+name+": "+Config.CURRENCY_SYMBOL.get()+df.format(p.getSecond())), false);
 		}
 		return 0;
 	}

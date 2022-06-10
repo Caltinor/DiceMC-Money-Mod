@@ -9,7 +9,7 @@ import dicemc.money.setup.Config;
 import dicemc.money.storage.MoneyWSD;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 
 public class AccountCommandRoot implements Command<CommandSourceStack>{
@@ -26,7 +26,7 @@ public class AccountCommandRoot implements Command<CommandSourceStack>{
 	public int run(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
 		ServerLevel world = context.getSource().getServer().overworld();		
 		Double balP = MoneyWSD.get(world).getBalance(AcctTypes.PLAYER.key, context.getSource().getEntityOrException().getUUID());
-		context.getSource().sendSuccess(new TextComponent(Config.CURRENCY_SYMBOL.get()+String.valueOf(balP)), false);
+		context.getSource().sendSuccess(Component.literal(Config.CURRENCY_SYMBOL.get()+String.valueOf(balP)), false);
 		return 0;
 	}
 	

@@ -12,7 +12,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
 
 public class ShopCommandBuilder implements Command<CommandSourceStack>{
 	public static final Map<UUID, ItemStack> buildRef = new HashMap<>();
@@ -27,7 +27,7 @@ public class ShopCommandBuilder implements Command<CommandSourceStack>{
 	
 	@Override
 	public int run(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-		context.getSource().sendSuccess(new TextComponent("WIP"), true);
+		context.getSource().sendSuccess(Component.literal("WIP"), true);
 		return 0;
 	}
 

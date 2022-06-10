@@ -1,6 +1,6 @@
 package dicemc.money.compat.ftbquests;
 
-import dev.ftb.mods.ftblibrary.config.ConfigGroup;
+/*import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.reward.RewardType;
@@ -13,10 +13,11 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.OnlyIn;*/
 
-public class MoneyReward extends Reward{
-	public static RewardType MONEY_REWARD = FTBQHandler.MONEY_REWARD;
+public class MoneyReward// extends Reward
+{
+	/*public static RewardType MONEY_REWARD = FTBQHandler.MONEY_REWARD;
 	public double amount = 0;
 
 	public MoneyReward(Quest q) {
@@ -72,5 +73,5 @@ public class MoneyReward extends Reward{
     {
         return new TranslatableComponent("ftbquests.reward.dicemcmm.moneyreward").append(" "+Config.CURRENCY_SYMBOL.get()+String.valueOf(amount));
     }
-
+*/
 }

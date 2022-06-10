@@ -18,8 +18,7 @@ import dicemc.money.storage.MoneyWSD;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -86,7 +85,7 @@ public class AccountCommandAdmin{
 		String symbol = Config.CURRENCY_SYMBOL.get();
 		double value = DoubleArgumentType.getDouble(context, "amount");
 		if (pid == null) {
-			context.getSource().sendFailure(new TranslatableComponent("message.command.playernotfound"));
+			context.getSource().sendFailure(Component.translatable("message.command.playernotfound"));
 			return 1;
 		}
 		switch (option) {
@@ -103,10 +102,10 @@ public class AccountCommandAdmin{
 							, value, "Admin Set Command");
 				}
 				context.getSource().sendSuccess(
-					new TranslatableComponent("message.command.set.success", player.getName(), symbol+String.valueOf(value)), true);
+					Component.translatable("message.command.set.success", player.getName(), symbol+String.valueOf(value)), true);
 				return 0;
 			}
-			context.getSource().sendFailure(new TranslatableComponent("message.command.set.failure"));
+			context.getSource().sendFailure(Component.translatable("message.command.set.failure"));
 			return 1;
 		}
 		case "give": {
@@ -122,10 +121,10 @@ public class AccountCommandAdmin{
 							, value, "Admin Give Command");
 				}
 				context.getSource().sendSuccess(
-					new TranslatableComponent("message.command.give.success", symbol+String.valueOf(value), player.getName()), true);
+					Component.translatable("message.command.give.success", symbol+String.valueOf(value), player.getName()), true);
 				return 0;
 			}
-			context.getSource().sendFailure(new TranslatableComponent("message.command.change.failure"));
+			context.getSource().sendFailure(Component.translatable("message.command.change.failure"));
 			return 1;
 		}
 		case "take": {
@@ -141,10 +140,10 @@ public class AccountCommandAdmin{
 							, value, "Admin Take Command");
 				}
 				context.getSource().sendSuccess(
-					new TranslatableComponent("message.command.take.success", symbol+String.valueOf(value), player.getName()), true);
+					Component.translatable("message.command.take.success", symbol+String.valueOf(value), player.getName()), true);
 				return 0;
 			}
-			context.getSource().sendFailure(new TranslatableComponent("message.command.change.failure"));
+			context.getSource().sendFailure(Component.translatable("message.command.change.failure"));
 			return 1;
 		}
 		default:}
@@ -164,11 +163,11 @@ public class AccountCommandAdmin{
 		MoneyWSD wsd = MoneyWSD.get(context.getSource().getServer().overworld());
 		String symbol = Config.CURRENCY_SYMBOL.get();
 		if (player == null) {
-			context.getSource().sendFailure(new TranslatableComponent("message.command.playernotfound"));
+			context.getSource().sendFailure(Component.translatable("message.command.playernotfound"));
 			return 1;
 		}
 		double balP = wsd.getBalance(AcctTypes.PLAYER.key, player.getId()); 
-		context.getSource().sendSuccess(new TextComponent(symbol+String.valueOf(balP)), true);		
+		context.getSource().sendSuccess(Component.literal(symbol+String.valueOf(balP)), true);		
 		return 0;
 	}
 	
@@ -189,11 +188,11 @@ public class AccountCommandAdmin{
 		String symbol = Config.CURRENCY_SYMBOL.get();
 		double value = DoubleArgumentType.getDouble(context, "amount");
 		if (fromplayer == null) {
-			context.getSource().sendFailure(new TranslatableComponent("message.command.playernotfound"));
+			context.getSource().sendFailure(Component.translatable("message.command.playernotfound"));
 			return 1;
 		}
 		if (toplayer == null) {
-			context.getSource().sendFailure(new TranslatableComponent("message.command.playernotfound"));
+			context.getSource().sendFailure(Component.translatable("message.command.playernotfound"));
 			return 1;
 		}
 		boolean result = wsd.transferFunds(AcctTypes.PLAYER.key, fromplayer.getId(), AcctTypes.PLAYER.key, toplayer.getId(), value);
@@ -206,10 +205,10 @@ public class AccountCommandAdmin{
 						, toplayer.getId(), AcctTypes.PLAYER.key, toplayer.getName(), value, "Admin Transfer Command Executed by: "+ srcName);
 			}
 			context.getSource().sendSuccess(
-				new TranslatableComponent("message.command.transfer.success", symbol+String.valueOf(value), toplayer.getName()), true);
+				Component.translatable("message.command.transfer.success", symbol+String.valueOf(value), toplayer.getName()), true);
 			return 0;
 		}
-		context.getSource().sendFailure(new TranslatableComponent("message.command.transfer.failure"));
+		context.getSource().sendFailure(Component.translatable("message.command.transfer.failure"));
 		return 1;
 	}
 

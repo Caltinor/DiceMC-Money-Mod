@@ -17,7 +17,7 @@ import dicemc.money.storage.MoneyWSD;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 
 public class AccountCommandTransfer implements Command<CommandSourceStack>{
@@ -39,14 +39,14 @@ private static final AccountCommandTransfer CMD = new AccountCommandTransfer();
 		UUID recipient = context.getSource().getServer().getProfileCache().get(StringArgumentType.getString(context, "recipient")).get().getId();
 		if (MoneyWSD.get(world).transferFunds(AcctTypes.PLAYER.key, player.getUUID(), AcctTypes.PLAYER.key, recipient, value)) {
 			if (Config.ENABLE_HISTORY.get()) {
-				MoneyMod.dbm.postEntry(System.currentTimeMillis(), player.getUUID(), AcctTypes.PLAYER.key, player.getName().getContents()
+				MoneyMod.dbm.postEntry(System.currentTimeMillis(), player.getUUID(), AcctTypes.PLAYER.key, player.getName().getString()
 						, recipient, AcctTypes.PLAYER.key, context.getSource().getServer().getProfileCache().get(recipient).get().getName()
 						, value, "Player Transfer Command. From is who executed");
 			}
-			context.getSource().sendSuccess(new TranslatableComponent("message.command.transfer.success", Math.abs(value), StringArgumentType.getString(context, "recipient")), true);
+			context.getSource().sendSuccess(Component.translatable("message.command.transfer.success", Math.abs(value), StringArgumentType.getString(context, "recipient")), true);
 		}
 		else 
-			context.getSource().sendSuccess(new TranslatableComponent("message.command.transfer.failure"), false);
+			context.getSource().sendSuccess(Component.translatable("message.command.transfer.failure"), false);
 		return 0;
 	}
 }

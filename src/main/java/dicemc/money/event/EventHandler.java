@@ -30,9 +30,8 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.core.Direction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.common.util.LazyOptional;
@@ -61,7 +60,7 @@ public class EventHandler {
 			ServerPlayer player = (ServerPlayer) event.getEntity();
 			String symbol = Config.CURRENCY_SYMBOL.get();
 			double balP = MoneyWSD.get(player.getServer().overworld()).getBalance(AcctTypes.PLAYER.key, player.getUUID());
-			player.sendMessage(new TextComponent(symbol+String.valueOf(balP)), player.getUUID());
+			player.sendSystemMessage(Component.literal(symbol+String.valueOf(balP)));
 		}
 	}
 	
@@ -76,10 +75,10 @@ public class EventHandler {
 				MoneyWSD.get(player.getServer().overworld()).changeBalance(AcctTypes.PLAYER.key, player.getUUID(), -loss);
 				if (Config.ENABLE_HISTORY.get()) {
 					MoneyMod.dbm.postEntry(System.currentTimeMillis(), DatabaseManager.NIL, AcctTypes.SERVER.key, "Server"
-							, player.getUUID(), AcctTypes.PLAYER.key, player.getName().getContents()
+							, player.getUUID(), AcctTypes.PLAYER.key, player.getName().getString()
 							, -loss, "Loss on Death Event");
 				}
-				player.sendMessage(new TranslatableComponent("message.death", loss), player.getUUID());
+				player.sendSystemMessage(Component.translatable("message.death", loss));
 			}
 		}
 	}
@@ -205,31 +204,27 @@ public class EventHandler {
 		}).orElse(ItemStack.EMPTY);
 		if (srcStack.equals(ItemStack.EMPTY, true)) return false;
 		//first confirm the action type is valid
-		if (actionEntry.getContents().equalsIgnoreCase("[buy]")
-				|| actionEntry.getContents().equalsIgnoreCase("[sell]")
-				|| actionEntry.getContents().equalsIgnoreCase("[server-buy]")
-				|| actionEntry.getContents().equalsIgnoreCase("[server-sell]")) {
+		if (actionEntry.getString().equalsIgnoreCase("[buy]")
+				|| actionEntry.getString().equalsIgnoreCase("[sell]")
+				|| actionEntry.getString().equalsIgnoreCase("[server-buy]")
+				|| actionEntry.getString().equalsIgnoreCase("[server-sell]")) {
 			//second confirm the price value is valid
-			if (actionEntry.getContents().equalsIgnoreCase("[server-buy]") || actionEntry.getContents().equalsIgnoreCase("[server-sell]")) {
+			if (actionEntry.getString().equalsIgnoreCase("[server-buy]") || actionEntry.getString().equalsIgnoreCase("[server-sell]")) {
 				if (!player.hasPermissions(Config.ADMIN_LEVEL.get())) {
-					player.sendMessage(new TranslatableComponent("message.activate.failure.admin"), player.getUUID());
+					player.sendSystemMessage(Component.translatable("message.activate.failure.admin"));
 					return false;
 				}
 			}
 			else if (!player.hasPermissions(Config.SHOP_LEVEL.get())) {
-				player.sendMessage(new TranslatableComponent("message.activate.failure.admin"), player.getUUID());
+				player.sendSystemMessage(Component.translatable("message.activate.failure.admin"));
 				return false;
 			}
 			try {
 				double price = Math.abs(Double.valueOf(priceEntry.getString()));
 				tile.getTileData().putDouble("price", price);
-				TextComponent newAction = new TextComponent(actionEntry.getContents());
-				newAction.withStyle(ChatFormatting.BLUE);
-				tile.setMessage(0, newAction);
-				TextComponent newPrice = new TextComponent(Config.CURRENCY_SYMBOL.get()+String.valueOf(price));
-				newPrice.withStyle(ChatFormatting.GOLD);
-				tile.setMessage(3, newPrice);
-				switch (actionEntry.getContents()) {
+				tile.setMessage(0, Component.literal(actionEntry.getString()).withStyle(ChatFormatting.BLUE));
+				tile.setMessage(3, Component.literal(Config.CURRENCY_SYMBOL.get()+String.valueOf(price)).withStyle(ChatFormatting.GOLD));
+				switch (actionEntry.getString().toLowerCase()) {
 				case "[buy]": {tile.getTileData().putString("shop-type", "buy"); break;}
 				case "[sell]": {tile.getTileData().putString("shop-type", "sell");break;}
 				case "[server-buy]": {tile.getTileData().putString("shop-type", "server-buy");break;}
@@ -260,7 +255,7 @@ public class EventHandler {
 				return true;
 			}
 			catch(NumberFormatException e) {
-				player.sendMessage(new TranslatableComponent("message.activate.failure.money"), player.getUUID());
+				player.sendSystemMessage(Component.translatable("message.activate.failure.money"));
 				world.destroyBlock(pos, true, player);
 			}
 		}
@@ -293,15 +288,15 @@ public class EventHandler {
 			transItems.add(ItemStack.of(itemsList.getCompound(i)));
 		}
 		double value = nbt.getDouble("price");
-		TextComponent itemComponent = getTransItemsDisplayString(transItems);
+		MutableComponent itemComponent = getTransItemsDisplayString(transItems);
 		if (isBuy)
-			player.sendMessage(new TranslatableComponent("message.shop.info", itemComponent, Config.CURRENCY_SYMBOL.get()+String.valueOf(value)), player.getUUID());
+			player.sendSystemMessage(Component.translatable("message.shop.info", itemComponent, Config.CURRENCY_SYMBOL.get()+String.valueOf(value)));
 		else
-			player.sendMessage(new TranslatableComponent("message.shop.info", Config.CURRENCY_SYMBOL.get()+String.valueOf(value), itemComponent), player.getUUID());
+			player.sendSystemMessage(Component.translatable("message.shop.info", Config.CURRENCY_SYMBOL.get()+String.valueOf(value), itemComponent));
 		timeSinceClick.put(player.getUUID(), System.currentTimeMillis());
 	}
 	
-	private static TextComponent getTransItemsDisplayString(List<ItemStack> list ) {
+	private static MutableComponent getTransItemsDisplayString(List<ItemStack> list ) {
 		List<ItemStack> items = new ArrayList<>();
 		for (int l = 0; l < list.size(); l++) {
 			boolean hadMatch = false;
@@ -314,7 +309,7 @@ public class EventHandler {
 			}
 			if (!hadMatch) items.add(list.get(l));
 		}
-		TextComponent itemComponent = new TextComponent("");
+		MutableComponent itemComponent = Component.literal("");
 		boolean isFirst = true;
 		for (ItemStack item : items) {
 			if (!isFirst) itemComponent.append(", ");
@@ -356,7 +351,7 @@ public class EventHandler {
 			//First check the available funds and stock for trade
 			double balP = wsd.getBalance(AcctTypes.PLAYER.key, player.getUUID());
 			if (value > balP) {
-				player.sendMessage(new TranslatableComponent("message.shop.buy.failure.funds"), player.getUUID());
+				player.sendSystemMessage(Component.translatable("message.shop.buy.failure.funds"));
 				return;
 			}
 			Map<Integer, ItemStack> slotMap = new HashMap<>();
@@ -380,7 +375,7 @@ public class EventHandler {
 					return stackSize[0] <= 0;
 				});
 				if (!test.get()) {
-					player.sendMessage(new TranslatableComponent("message.shop.buy.failure.stock"), player.getUUID());
+					player.sendSystemMessage(Component.translatable("message.shop.buy.failure.stock"));
 					return;
 				}
 			}
@@ -391,7 +386,7 @@ public class EventHandler {
 			if (Config.ENABLE_HISTORY.get()) {
 				String itemPrint = "";
 				itemsList.forEach((a) -> {itemPrint.concat(a.getAsString());});
-				MoneyMod.dbm.postEntry(System.currentTimeMillis(), player.getUUID(), AcctTypes.PLAYER.key, player.getName().getContents()
+				MoneyMod.dbm.postEntry(System.currentTimeMillis(), player.getUUID(), AcctTypes.PLAYER.key, player.getName().getString()
 						, shopOwner, AcctTypes.PLAYER.key, player.getServer().getProfileCache().get(shopOwner).get().getName()
 						, value, itemsList.getAsString());
 			}
@@ -402,10 +397,10 @@ public class EventHandler {
 						player.drop(pStack, false);
 				}
 			});
-			TranslatableComponent msg =  new TranslatableComponent("message.shop.buy.success"
+			MutableComponent msg =  Component.translatable("message.shop.buy.success"
 					, getTransItemsDisplayString(transItems), Config.CURRENCY_SYMBOL.get()+String.valueOf(value));
-			player.sendMessage(msg, player.getUUID());
-			player.getServer().sendMessage(msg, player.getUUID());
+			player.displayClientMessage(msg, true);
+			player.getServer().sendSystemMessage(msg);
 			return;
 		}
 		//================SELL=================================================================================
@@ -414,7 +409,7 @@ public class EventHandler {
 			UUID shopOwner = nbt.getUUID("owner");
 			double balP = wsd.getBalance(AcctTypes.PLAYER.key, shopOwner);
 			if (value > balP) {
-				player.sendMessage(new TranslatableComponent("message.shop.sell.failure.funds"), player.getUUID());
+				player.sendSystemMessage(Component.translatable("message.shop.sell.failure.funds"));
 				return;
 			}
 			//test if player has item in inventory to sell
@@ -437,7 +432,7 @@ public class EventHandler {
 					if (stackSize <= 0) break;
 				}
 				if (stackSize > 0) {
-					player.sendMessage(new TranslatableComponent("message.shop.sell.failure.stock"), player.getUUID());
+					player.sendSystemMessage(Component.translatable("message.shop.sell.failure.stock"));
 					return;
 				}
 				
@@ -464,7 +459,7 @@ public class EventHandler {
 						}
 					}
 					if (!sim.isEmpty()) {
-						player.sendMessage(new TranslatableComponent("message.shop.sell.failure.space"), player.getUUID());
+						player.sendSystemMessage(Component.translatable("message.shop.sell.failure.space"));
 						return false;
 					}
 					return true;
@@ -477,7 +472,7 @@ public class EventHandler {
 				String itemPrint = "";
 				itemsList.forEach((a) -> {itemPrint.concat(a.getAsString());});
 				MoneyMod.dbm.postEntry(System.currentTimeMillis(), shopOwner, AcctTypes.PLAYER.key, player.getServer().getProfileCache().get(shopOwner).get().getName()
-						, player.getUUID(), AcctTypes.PLAYER.key, player.getName().getContents()
+						, player.getUUID(), AcctTypes.PLAYER.key, player.getName().getString()
 						, value, itemsList.getAsString());
 			}
 			for (Map.Entry<Integer, ItemStack> pSlots : slotMap.entrySet()) {
@@ -488,9 +483,8 @@ public class EventHandler {
 					p.insertItem(map.getKey(), map.getValue(), false);
 				}
 			});
-			player.sendMessage(new TranslatableComponent("message.shop.sell.success"
-					, Config.CURRENCY_SYMBOL.get()+String.valueOf(value), getTransItemsDisplayString(transItems)
-					), player.getUUID());
+			player.sendSystemMessage(Component.translatable("message.shop.sell.success"
+					, Config.CURRENCY_SYMBOL.get()+String.valueOf(value), getTransItemsDisplayString(transItems)));
 			return;
 		}
 		//================SERVER BUY=================================================================================
@@ -498,7 +492,7 @@ public class EventHandler {
 			//First check the available funds and stock for trade
 			double balP = wsd.getBalance(AcctTypes.PLAYER.key, player.getUUID());
 			if (value > balP) {
-				player.sendMessage(new TranslatableComponent("message.shop.buy.failure.funds"), player.getUUID());
+				player.sendSystemMessage(Component.translatable("message.shop.buy.failure.funds"));
 				return;
 			}
 			wsd.changeBalance(AcctTypes.PLAYER.key, player.getUUID(), -value);
@@ -506,7 +500,7 @@ public class EventHandler {
 				String itemPrint = "";
 				itemsList.forEach((a) -> {itemPrint.concat(a.getAsString());});
 				MoneyMod.dbm.postEntry(System.currentTimeMillis(), DatabaseManager.NIL, AcctTypes.SERVER.key, "Server"
-						, player.getUUID(), AcctTypes.PLAYER.key, player.getName().getContents()
+						, player.getUUID(), AcctTypes.PLAYER.key, player.getName().getString()
 						, -value, itemsList.getAsString());
 			}
 			for (int i = 0; i < transItems.size(); i++) {
@@ -514,9 +508,8 @@ public class EventHandler {
 				if (!player.addItem(pStack))
 					player.drop(pStack, false);
 			}
-			player.sendMessage(new TranslatableComponent("message.shop.buy.success"
-					, getTransItemsDisplayString(transItems), Config.CURRENCY_SYMBOL.get()+String.valueOf(value)
-					), player.getUUID());
+			player.sendSystemMessage(Component.translatable("message.shop.buy.success"
+					, getTransItemsDisplayString(transItems), Config.CURRENCY_SYMBOL.get()+String.valueOf(value)));
 			return;
 		}
 		//================SERVER SELL=================================================================================
@@ -539,7 +532,7 @@ public class EventHandler {
 					if (stackSize <= 0) break;
 				}
 				if (stackSize > 0) {
-					player.sendMessage(new TranslatableComponent("message.shop.sell.failure.stock"), player.getUUID());
+					player.sendSystemMessage(Component.translatable("message.shop.sell.failure.stock"));
 					return;
 				}
 				
@@ -549,15 +542,14 @@ public class EventHandler {
 				String itemPrint = "";
 				itemsList.forEach((a) -> {itemPrint.concat(a.getAsString());});
 				MoneyMod.dbm.postEntry(System.currentTimeMillis(), DatabaseManager.NIL, AcctTypes.SERVER.key, "Server"
-						, player.getUUID(), AcctTypes.PLAYER.key, player.getName().getContents()
+						, player.getUUID(), AcctTypes.PLAYER.key, player.getName().getString()
 						, value, itemsList.getAsString());
 			}
 			for (Map.Entry<Integer, ItemStack> pSlots : slotMap.entrySet()) {
 				player.getInventory().getItem(pSlots.getKey()).shrink(pSlots.getValue().getCount());
 			}
-			player.sendMessage(new TranslatableComponent("message.shop.sell.success"
-					, Config.CURRENCY_SYMBOL.get()+String.valueOf(value), getTransItemsDisplayString(transItems)
-					), player.getUUID());
+			player.sendSystemMessage(Component.translatable("message.shop.sell.success"
+					, Config.CURRENCY_SYMBOL.get()+String.valueOf(value), getTransItemsDisplayString(transItems)));
 			return;
 		}
 	}
