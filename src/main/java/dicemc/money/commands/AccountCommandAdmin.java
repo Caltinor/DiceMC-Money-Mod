@@ -82,7 +82,6 @@ public class AccountCommandAdmin{
 		String option = StringArgumentType.getString(context, "action");
 		//GameProfile player = EntityArgument.getPlayer(context, "player").getGameProfile();
 		UUID pid = player.getId();
-		String symbol = Config.CURRENCY_SYMBOL.get();
 		double value = DoubleArgumentType.getDouble(context, "amount");
 		if (pid == null) {
 			context.getSource().sendFailure(Component.translatable("message.command.playernotfound"));
@@ -102,7 +101,7 @@ public class AccountCommandAdmin{
 							, value, "Admin Set Command");
 				}
 				context.getSource().sendSuccess(
-					Component.translatable("message.command.set.success", player.getName(), symbol+String.valueOf(value)), true);
+					Component.translatable("message.command.set.success", player.getName(), Config.getFormattedCurrency(value)), true);
 				return 0;
 			}
 			context.getSource().sendFailure(Component.translatable("message.command.set.failure"));
@@ -121,7 +120,7 @@ public class AccountCommandAdmin{
 							, value, "Admin Give Command");
 				}
 				context.getSource().sendSuccess(
-					Component.translatable("message.command.give.success", symbol+String.valueOf(value), player.getName()), true);
+					Component.translatable("message.command.give.success", Config.getFormattedCurrency(value), player.getName()), true);
 				return 0;
 			}
 			context.getSource().sendFailure(Component.translatable("message.command.change.failure"));
@@ -140,7 +139,7 @@ public class AccountCommandAdmin{
 							, value, "Admin Take Command");
 				}
 				context.getSource().sendSuccess(
-					Component.translatable("message.command.take.success", symbol+String.valueOf(value), player.getName()), true);
+					Component.translatable("message.command.take.success", Config.getFormattedCurrency(value), player.getName()), true);
 				return 0;
 			}
 			context.getSource().sendFailure(Component.translatable("message.command.change.failure"));
@@ -161,13 +160,12 @@ public class AccountCommandAdmin{
 		}
 		//rest of logic
 		MoneyWSD wsd = MoneyWSD.get(context.getSource().getServer().overworld());
-		String symbol = Config.CURRENCY_SYMBOL.get();
 		if (player == null) {
 			context.getSource().sendFailure(Component.translatable("message.command.playernotfound"));
 			return 1;
 		}
 		double balP = wsd.getBalance(AcctTypes.PLAYER.key, player.getId()); 
-		context.getSource().sendSuccess(Component.literal(symbol+String.valueOf(balP)), true);		
+		context.getSource().sendSuccess(Component.literal(Config.getFormattedCurrency(balP)), true);		
 		return 0;
 	}
 	
@@ -185,7 +183,6 @@ public class AccountCommandAdmin{
 		}
 		//rest of logic
 		MoneyWSD wsd = MoneyWSD.get(context.getSource().getServer().overworld());
-		String symbol = Config.CURRENCY_SYMBOL.get();
 		double value = DoubleArgumentType.getDouble(context, "amount");
 		if (fromplayer == null) {
 			context.getSource().sendFailure(Component.translatable("message.command.playernotfound"));
@@ -205,7 +202,7 @@ public class AccountCommandAdmin{
 						, toplayer.getId(), AcctTypes.PLAYER.key, toplayer.getName(), value, "Admin Transfer Command Executed by: "+ srcName);
 			}
 			context.getSource().sendSuccess(
-				Component.translatable("message.command.transfer.success", symbol+String.valueOf(value), toplayer.getName()), true);
+				Component.translatable("message.command.transfer.success", Config.getFormattedCurrency(value), toplayer.getName()), true);
 			return 0;
 		}
 		context.getSource().sendFailure(Component.translatable("message.command.transfer.failure"));

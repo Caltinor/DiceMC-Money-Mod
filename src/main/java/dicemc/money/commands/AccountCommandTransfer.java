@@ -43,7 +43,7 @@ private static final AccountCommandTransfer CMD = new AccountCommandTransfer();
 						, recipient, AcctTypes.PLAYER.key, context.getSource().getServer().getProfileCache().get(recipient).get().getName()
 						, value, "Player Transfer Command. From is who executed");
 			}
-			context.getSource().sendSuccess(Component.translatable("message.command.transfer.success", Math.abs(value), StringArgumentType.getString(context, "recipient")), true);
+			context.getSource().sendSuccess(Component.translatable("message.command.transfer.success", Config.getFormattedCurrency(Math.abs(value)), StringArgumentType.getString(context, "recipient")), true);
 		}
 		else 
 			context.getSource().sendSuccess(Component.translatable("message.command.transfer.failure"), false);

@@ -1,5 +1,7 @@
 package dicemc.money.setup;
 
+import java.text.DecimalFormat;
+
 import net.minecraftforge.common.ForgeConfigSpec;
 
 public class Config {
@@ -14,6 +16,7 @@ public class Config {
 	//Misc variables
 	public static ForgeConfigSpec.ConfigValue<Double> STARTING_FUNDS;
 	public static ForgeConfigSpec.ConfigValue<String> CURRENCY_SYMBOL;
+	public static ForgeConfigSpec.ConfigValue<Boolean>CURRENCY_POSITION;
 	public static ForgeConfigSpec.ConfigValue<Integer> ADMIN_LEVEL;
 	public static ForgeConfigSpec.ConfigValue<Integer> SHOP_LEVEL;
 	public static ForgeConfigSpec.ConfigValue<Double> LOSS_ON_DEATH;
@@ -37,6 +40,8 @@ public class Config {
 				.defineInRange("starting_funds", 1000D, 0, Double.MAX_VALUE);
 		CURRENCY_SYMBOL = builder.comment("the character(s) to precede money values when displayed")
 				.define("currency symbol", "$");
+		CURRENCY_POSITION = builder.comment("if true the symbol appears to the left of the value, if false, it will appear to the right.")
+				.define("Currency Symbol Left Oriented", true);
 		ADMIN_LEVEL = builder.comment("the op level permitted to use admin commands")
 				.defineInRange("admin level", 2, 0, 4, Integer.class);
 		SHOP_LEVEL = builder.comment("The minimum permission level to create basic shops.  default= 0 = all players")
@@ -51,5 +56,12 @@ public class Config {
 				.define("enable_history", false);
 		
 		builder.pop();		
+	}
+	
+	public static String getFormattedCurrency(double value) {
+		return CURRENCY_POSITION.get() ? CURRENCY_SYMBOL.get()+value : value + CURRENCY_SYMBOL.get();
+	}
+	public static String getFormattedCurrency(DecimalFormat df, double value) {
+		return CURRENCY_POSITION.get() ? CURRENCY_SYMBOL.get()+df.format(value) : df.format(value) + CURRENCY_SYMBOL.get();
 	}
 }

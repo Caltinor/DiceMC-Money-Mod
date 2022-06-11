@@ -58,9 +58,8 @@ public class EventHandler {
 	public static void onPlayerLogin(PlayerLoggedInEvent event) {
 		if (!event.getPlayer().getCommandSenderWorld().isClientSide && event.getPlayer() instanceof ServerPlayer) {
 			ServerPlayer player = (ServerPlayer) event.getEntity();
-			String symbol = Config.CURRENCY_SYMBOL.get();
 			double balP = MoneyWSD.get(player.getServer().overworld()).getBalance(AcctTypes.PLAYER.key, player.getUUID());
-			player.sendSystemMessage(Component.literal(symbol+String.valueOf(balP)));
+			player.sendSystemMessage(Component.literal(Config.getFormattedCurrency(balP)));
 		}
 	}
 	
@@ -78,7 +77,7 @@ public class EventHandler {
 							, player.getUUID(), AcctTypes.PLAYER.key, player.getName().getString()
 							, -loss, "Loss on Death Event");
 				}
-				player.sendSystemMessage(Component.translatable("message.death", loss));
+				player.sendSystemMessage(Component.translatable("message.death", Config.getFormattedCurrency(loss)));
 			}
 		}
 	}
@@ -223,7 +222,7 @@ public class EventHandler {
 				double price = Math.abs(Double.valueOf(priceEntry.getString()));
 				tile.getTileData().putDouble("price", price);
 				tile.setMessage(0, Component.literal(actionEntry.getString()).withStyle(ChatFormatting.BLUE));
-				tile.setMessage(3, Component.literal(Config.CURRENCY_SYMBOL.get()+String.valueOf(price)).withStyle(ChatFormatting.GOLD));
+				tile.setMessage(3, Component.literal(Config.getFormattedCurrency(price)).withStyle(ChatFormatting.GOLD));
 				switch (actionEntry.getString().toLowerCase()) {
 				case "[buy]": {tile.getTileData().putString("shop-type", "buy"); break;}
 				case "[sell]": {tile.getTileData().putString("shop-type", "sell");break;}
@@ -290,9 +289,9 @@ public class EventHandler {
 		double value = nbt.getDouble("price");
 		MutableComponent itemComponent = getTransItemsDisplayString(transItems);
 		if (isBuy)
-			player.sendSystemMessage(Component.translatable("message.shop.info", itemComponent, Config.CURRENCY_SYMBOL.get()+String.valueOf(value)));
+			player.sendSystemMessage(Component.translatable("message.shop.info", itemComponent, Config.getFormattedCurrency(value)));
 		else
-			player.sendSystemMessage(Component.translatable("message.shop.info", Config.CURRENCY_SYMBOL.get()+String.valueOf(value), itemComponent));
+			player.sendSystemMessage(Component.translatable("message.shop.info", Config.getFormattedCurrency(value), itemComponent));
 		timeSinceClick.put(player.getUUID(), System.currentTimeMillis());
 	}
 	
@@ -398,7 +397,7 @@ public class EventHandler {
 				}
 			});
 			MutableComponent msg =  Component.translatable("message.shop.buy.success"
-					, getTransItemsDisplayString(transItems), Config.CURRENCY_SYMBOL.get()+String.valueOf(value));
+					, getTransItemsDisplayString(transItems), Config.getFormattedCurrency(value));
 			player.displayClientMessage(msg, true);
 			player.getServer().sendSystemMessage(msg);
 			return;
@@ -484,7 +483,7 @@ public class EventHandler {
 				}
 			});
 			player.sendSystemMessage(Component.translatable("message.shop.sell.success"
-					, Config.CURRENCY_SYMBOL.get()+String.valueOf(value), getTransItemsDisplayString(transItems)));
+					, Config.getFormattedCurrency(value), getTransItemsDisplayString(transItems)));
 			return;
 		}
 		//================SERVER BUY=================================================================================
@@ -509,7 +508,7 @@ public class EventHandler {
 					player.drop(pStack, false);
 			}
 			player.sendSystemMessage(Component.translatable("message.shop.buy.success"
-					, getTransItemsDisplayString(transItems), Config.CURRENCY_SYMBOL.get()+String.valueOf(value)));
+					, getTransItemsDisplayString(transItems), Config.getFormattedCurrency(value)));
 			return;
 		}
 		//================SERVER SELL=================================================================================
@@ -549,7 +548,7 @@ public class EventHandler {
 				player.getInventory().getItem(pSlots.getKey()).shrink(pSlots.getValue().getCount());
 			}
 			player.sendSystemMessage(Component.translatable("message.shop.sell.success"
-					, Config.CURRENCY_SYMBOL.get()+String.valueOf(value), getTransItemsDisplayString(transItems)));
+					, Config.getFormattedCurrency(value), getTransItemsDisplayString(transItems)));
 			return;
 		}
 	}

@@ -44,7 +44,7 @@ public class AccountCommandTop implements Command<CommandSourceStack>{
 		for (int i = 0; i < limit; i++) {
 			Pair<UUID, Double> p = sorted.get(i);
 			String name = context.getSource().getServer().getProfileCache().get(p.getFirst()).get().getName();
-			context.getSource().sendSuccess(Component.literal("#"+(i+1)+" "+name+": "+Config.CURRENCY_SYMBOL.get()+df.format(p.getSecond())), false);
+			context.getSource().sendSuccess(Component.literal("#"+(i+1)+" "+name+": "+Config.getFormattedCurrency(df, p.getSecond())), false);
 		}
 		return 0;
 	}
