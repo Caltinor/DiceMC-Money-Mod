@@ -34,16 +34,16 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.ChatFormatting;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.LeftClickBlock;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickBlock;
-import net.minecraftforge.event.world.BlockEvent.BreakEvent;
-import net.minecraftforge.event.world.BlockEvent.EntityPlaceEvent;
+import net.minecraftforge.event.level.BlockEvent.BreakEvent;
+import net.minecraftforge.event.level.BlockEvent.EntityPlaceEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.eventbus.api.Event.Result;
-import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 
 @Mod.EventBusSubscriber( modid=MoneyMod.MOD_ID, bus=Mod.EventBusSubscriber.Bus.FORGE)
@@ -56,7 +56,7 @@ public class EventHandler {
 	@SuppressWarnings("resource")
 	@SubscribeEvent
 	public static void onPlayerLogin(PlayerLoggedInEvent event) {
-		if (!event.getPlayer().getCommandSenderWorld().isClientSide && event.getPlayer() instanceof ServerPlayer) {
+		if (!event.getEntity().getLevel().isClientSide && event.getEntity() instanceof ServerPlayer) {
 			ServerPlayer player = (ServerPlayer) event.getEntity();
 			double balP = MoneyWSD.get(player.getServer().overworld()).getBalance(AcctTypes.PLAYER.key, player.getUUID());
 			player.sendSystemMessage(Component.literal(Config.getFormattedCurrency(balP)));
@@ -66,8 +66,8 @@ public class EventHandler {
 	@SuppressWarnings("resource")
 	@SubscribeEvent
 	public static void onPlayerDeath(LivingDeathEvent event) {
-		if (!event.getEntityLiving().getCommandSenderWorld().isClientSide && event.getEntityLiving() instanceof Player) {
-			Player player = (Player) event.getEntityLiving();
+		if (!event.getEntity().getLevel().isClientSide && event.getEntity() instanceof Player) {
+			Player player = (Player) event.getEntity();
 			double balp = MoneyWSD.get(player.getServer().overworld()).getBalance(AcctTypes.PLAYER.key, player.getUUID());
 			double loss = balp * Config.LOSS_ON_DEATH.get();
 			if (loss > 0) {
@@ -84,30 +84,30 @@ public class EventHandler {
 	
 	@SubscribeEvent
 	public static void onBlockPlace(EntityPlaceEvent event) {
-		if (event.getWorld().isClientSide()) return;
+		if (event.getLevel().isClientSide()) return;
 		boolean cancel = false;
-		if (event.getWorld().getBlockEntity(event.getPos().north()) != null 
-				&&event.getWorld().getBlockEntity(event.getPos().north()).getTileData().contains("is-shop")) {
+		if (event.getLevel().getBlockEntity(event.getPos().north()) != null 
+				&&event.getLevel().getBlockEntity(event.getPos().north()).getPersistentData().contains("is-shop")) {
 			cancel = true;
 		}
-		if (event.getWorld().getBlockEntity(event.getPos().south()) != null
-				&& event.getWorld().getBlockEntity(event.getPos().south()).getTileData().contains("is-shop")) {
+		if (event.getLevel().getBlockEntity(event.getPos().south()) != null
+				&& event.getLevel().getBlockEntity(event.getPos().south()).getPersistentData().contains("is-shop")) {
 			cancel = true;
 		}
-		if (event.getWorld().getBlockEntity(event.getPos().east()) != null 
-				&& event.getWorld().getBlockEntity(event.getPos().east()).getTileData().contains("is-shop")) {
+		if (event.getLevel().getBlockEntity(event.getPos().east()) != null 
+				&& event.getLevel().getBlockEntity(event.getPos().east()).getPersistentData().contains("is-shop")) {
 			cancel = true;
 		}
-		if (event.getWorld().getBlockEntity(event.getPos().west()) != null 
-				&& event.getWorld().getBlockEntity(event.getPos().west()).getTileData().contains("is-shop")) {
+		if (event.getLevel().getBlockEntity(event.getPos().west()) != null 
+				&& event.getLevel().getBlockEntity(event.getPos().west()).getPersistentData().contains("is-shop")) {
 			cancel = true;
 		}
-		if (event.getWorld().getBlockEntity(event.getPos().above()) != null 
-				&& event.getWorld().getBlockEntity(event.getPos().above()).getTileData().contains("is-shop")) {
+		if (event.getLevel().getBlockEntity(event.getPos().above()) != null 
+				&& event.getLevel().getBlockEntity(event.getPos().above()).getPersistentData().contains("is-shop")) {
 			cancel = true;
 		}
-		if (event.getWorld().getBlockEntity(event.getPos().below()) != null 
-				&& event.getWorld().getBlockEntity(event.getPos().below()).getTileData().contains("is-shop")) {
+		if (event.getLevel().getBlockEntity(event.getPos().below()) != null 
+				&& event.getLevel().getBlockEntity(event.getPos().below()).getPersistentData().contains("is-shop")) {
 			cancel = true;
 		}
 		event.setCanceled(cancel);
@@ -116,9 +116,9 @@ public class EventHandler {
 	@SuppressWarnings("static-access")
 	@SubscribeEvent
 	public static void onShopBreak(BreakEvent event) {
-		if (!event.getWorld().isClientSide() && event.getWorld().getBlockState(event.getPos()).getBlock() instanceof WallSignBlock) {
-			SignBlockEntity tile = (SignBlockEntity) event.getWorld().getBlockEntity(event.getPos());
-			CompoundTag nbt = tile.getTileData();
+		if (!event.getLevel().isClientSide() && event.getLevel().getBlockState(event.getPos()).getBlock() instanceof WallSignBlock) {
+			SignBlockEntity tile = (SignBlockEntity) event.getLevel().getBlockEntity(event.getPos());
+			CompoundTag nbt = tile.getPersistentData();
 			if (!nbt.isEmpty() && nbt.contains("shop-activated")) {
 				Player player = event.getPlayer();
 				boolean hasPerms = player.hasPermissions(Config.ADMIN_LEVEL.get());
@@ -127,13 +127,13 @@ public class EventHandler {
 				}
 				else if(nbt.getUUID("owner").equals(player.getUUID()) || hasPerms) {
 					BlockPos backBlock = BlockPos.of(BlockPos.offset(event.getPos().asLong(), tile.getBlockState().getValue(((WallSignBlock)tile.getBlockState().getBlock()).FACING).getOpposite()));
-					event.getWorld().getBlockEntity(backBlock).getTileData().remove("is-shop");
+					event.getLevel().getBlockEntity(backBlock).getPersistentData().remove("is-shop");
 				}
 			}
 		}
-		else if (!event.getWorld().isClientSide() && event.getWorld().getBlockEntity(event.getPos()) != null) {
-			if (event.getWorld().getBlockEntity(event.getPos()).getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).isPresent()) {
-				if (event.getWorld().getBlockEntity(event.getPos()).getTileData().contains("is-shop")) {
+		else if (!event.getLevel().isClientSide() && event.getLevel().getBlockEntity(event.getPos()) != null) {
+			if (event.getLevel().getBlockEntity(event.getPos()).getCapability(ForgeCapabilities.ITEM_HANDLER).isPresent()) {
+				if (event.getLevel().getBlockEntity(event.getPos()).getPersistentData().contains("is-shop")) {
 					Player player = event.getPlayer();
 					event.setCanceled(!player.hasPermissions(Config.ADMIN_LEVEL.get()));
 				}
@@ -143,11 +143,11 @@ public class EventHandler {
 	
 	@SubscribeEvent
 	public static void onStorageOpen(RightClickBlock event) {
-		BlockEntity invTile = event.getWorld().getBlockEntity(event.getPos());
-		if (invTile != null && invTile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).isPresent()) {
-			if (invTile.getTileData().contains("is-shop")) {
-				if (!invTile.getTileData().getUUID("owner").equals(event.getPlayer().getUUID())) {					
-					event.setCanceled(!event.getPlayer().hasPermissions(Config.ADMIN_LEVEL.get()));					
+		BlockEntity invTile = event.getLevel().getBlockEntity(event.getPos());
+		if (invTile != null && invTile.getCapability(ForgeCapabilities.ITEM_HANDLER).isPresent()) {
+			if (invTile.getPersistentData().contains("is-shop")) {
+				if (!invTile.getPersistentData().getUUID("owner").equals(event.getEntity().getUUID())) {					
+					event.setCanceled(!event.getEntity().hasPermissions(Config.ADMIN_LEVEL.get()));					
 				}
 			}
 		}
@@ -156,32 +156,32 @@ public class EventHandler {
 	@SuppressWarnings("resource")
 	@SubscribeEvent
 	public static void onSignLeftClick(LeftClickBlock event) {
-		if (!event.getWorld().isClientSide && event.getWorld().getBlockState(event.getPos()).getBlock() instanceof WallSignBlock) {
-			SignBlockEntity tile = (SignBlockEntity) event.getWorld().getBlockEntity(event.getPos());
-			CompoundTag nbt = tile.getTileData();
+		if (!event.getLevel().isClientSide && event.getLevel().getBlockState(event.getPos()).getBlock() instanceof WallSignBlock) {
+			SignBlockEntity tile = (SignBlockEntity) event.getLevel().getBlockEntity(event.getPos());
+			CompoundTag nbt = tile.getPersistentData();
 			if (nbt.contains("shop-activated"))	
-				getSaleInfo(nbt, event.getPlayer());
+				getSaleInfo(nbt, event.getEntity());
 		}
 	}
 	
 	@SuppressWarnings({ "resource", "static-access" })
 	@SubscribeEvent
 	public static void onSignRightClick(RightClickBlock event) {
-		if (!event.getWorld().isClientSide && event.getWorld().getBlockState(event.getPos()).getBlock() instanceof WallSignBlock) {
-			BlockState state = event.getWorld().getBlockState(event.getPos());
+		if (!event.getLevel().isClientSide && event.getLevel().getBlockState(event.getPos()).getBlock() instanceof WallSignBlock) {
+			BlockState state = event.getLevel().getBlockState(event.getPos());
 			WallSignBlock sign = (WallSignBlock) state.getBlock();
 			BlockPos backBlock = BlockPos.of(BlockPos.offset(event.getPos().asLong(), state.getValue(sign.FACING).getOpposite()));
-			if (event.getWorld().getBlockEntity(backBlock) != null) {
-				BlockEntity invTile = event.getWorld().getBlockEntity(backBlock);
-				if (invTile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).isPresent()) {
-					SignBlockEntity tile = (SignBlockEntity) event.getWorld().getBlockEntity(event.getPos());
+			if (event.getLevel().getBlockEntity(backBlock) != null) {
+				BlockEntity invTile = event.getLevel().getBlockEntity(backBlock);
+				if (invTile.getCapability(ForgeCapabilities.ITEM_HANDLER).isPresent()) {
+					SignBlockEntity tile = (SignBlockEntity) event.getLevel().getBlockEntity(event.getPos());
 					CompoundTag nbt = tile.saveWithFullMetadata();
 					if (!nbt.contains("ForgeData") || !nbt.getCompound("ForgeData").contains("shop-activated")) {
-						if (activateShop(invTile, tile, event.getWorld(), event.getPos(), nbt, event.getPlayer()))
+						if (activateShop(invTile, tile, event.getLevel(), event.getPos(), nbt, event.getEntity()))
 							event.setUseBlock(Result.DENY);
 					}
 					else {
-						processTransaction(invTile, tile, event.getPlayer());
+						processTransaction(invTile, tile, event.getEntity());
 						event.setUseBlock(Result.DENY);
 					}
 				}
@@ -193,7 +193,7 @@ public class EventHandler {
 		Component actionEntry = Component.Serializer.fromJson(nbt.getString("Text1"));
 		Component priceEntry  = Component.Serializer.fromJson(nbt.getString("Text4"));
 		//check if the storage block has an item in the first slot
-		LazyOptional<IItemHandler> inv = storage.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, Direction.UP);
+		LazyOptional<IItemHandler> inv = storage.getCapability(ForgeCapabilities.ITEM_HANDLER, Direction.UP);
 		ItemStack srcStack = inv.map((c) -> {
 			for (int i = 0; i < c.getSlots(); i++) {
 				if (c.getStackInSlot(i).isEmpty()) continue;
@@ -220,17 +220,17 @@ public class EventHandler {
 			}
 			try {
 				double price = Math.abs(Double.valueOf(priceEntry.getString()));
-				tile.getTileData().putDouble("price", price);
+				tile.getPersistentData().putDouble("price", price);
 				tile.setMessage(0, Component.literal(actionEntry.getString()).withStyle(ChatFormatting.BLUE));
 				tile.setMessage(3, Component.literal(Config.getFormattedCurrency(price)).withStyle(ChatFormatting.GOLD));
 				switch (actionEntry.getString().toLowerCase()) {
-				case "[buy]": {tile.getTileData().putString("shop-type", "buy"); break;}
-				case "[sell]": {tile.getTileData().putString("shop-type", "sell");break;}
-				case "[server-buy]": {tile.getTileData().putString("shop-type", "server-buy");break;}
-				case "[server-sell]": {tile.getTileData().putString("shop-type", "server-sell");break;}
+				case "[buy]": {tile.getPersistentData().putString("shop-type", "buy"); break;}
+				case "[sell]": {tile.getPersistentData().putString("shop-type", "sell");break;}
+				case "[server-buy]": {tile.getPersistentData().putString("shop-type", "server-buy");break;}
+				case "[server-sell]": {tile.getPersistentData().putString("shop-type", "server-sell");break;}
 				default:}
-				tile.getTileData().putBoolean("shop-activated", true);
-				tile.getTileData().putUUID("owner", player.getUUID());
+				tile.getPersistentData().putBoolean("shop-activated", true);
+				tile.getPersistentData().putUUID("owner", player.getUUID());
 				//Serialize all items in the TE and store them in a ListNBT
 				ListTag lnbt = new ListTag();
 				inv.ifPresent((p) -> {
@@ -243,11 +243,11 @@ public class EventHandler {
 							lnbt.add(inSlot.serializeNBT());
 					}
 				});
-				tile.getTileData().put("items", lnbt);
+				tile.getPersistentData().put("items", lnbt);
 				tile.saveWithFullMetadata();
 				tile.setChanged();
-				storage.getTileData().putBoolean("is-shop", true);
-				storage.getTileData().putUUID("owner", player.getUUID());
+				storage.getPersistentData().putBoolean("is-shop", true);
+				storage.getPersistentData().putUUID("owner", player.getUUID());
 				storage.saveWithFullMetadata();
 				BlockState state = world.getBlockState(pos);
 				world.sendBlockUpdated(pos, state, state, Block.UPDATE_CLIENTS);
@@ -321,8 +321,8 @@ public class EventHandler {
 	
 	private static void processTransaction(BlockEntity tile, SignBlockEntity sign, Player player) {
 		MoneyWSD wsd = MoneyWSD.get(player.getServer().overworld());
-		CompoundTag nbt = sign.getTileData();
-		LazyOptional<IItemHandler> inv = tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY);
+		CompoundTag nbt = sign.getPersistentData();
+		LazyOptional<IItemHandler> inv = tile.getCapability(ForgeCapabilities.ITEM_HANDLER);
 		List<ItemStack> transItems = new ArrayList<>();
 		Map<ItemStack, ItemStack> consolidatedItems = new HashMap<>();
 		ListTag itemsList = nbt.getList("items", Tag.TAG_COMPOUND);

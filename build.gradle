@@ -18,9 +18,10 @@ repositories {
     maven {
         url "https://www.cursemaven.com"
     }
+    flatDir { dirs 'libs' }
 }
 
-version = '1.19-0.0.2'
+version = '1.19.2-0.0.1'
 group = 'dicemc.money' 
 archivesBaseName = 'DiceMC Money'
 
@@ -28,7 +29,7 @@ java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
 minecraft {
-    mappings channel: 'official', version: '1.19'
+    mappings channel: 'official', version: '1.19.2'
 
     runs {
         client {
@@ -72,19 +73,14 @@ minecraft {
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.19-41.0.1'
+    minecraft 'net.minecraftforge:forge:1.19.2-43.1.2'
     //implementation files("C:/MinecraftModding/1-16-2/h2-1.4.200.jar") 
     
-    //compileOnly fg.deobf("curse.maven:ftbquests-289412:3725771")
-    //runtimeOnly fg.deobf("curse.maven:ftbquests-289412:3725771")
-    //compileOnly fg.deobf("curse.maven:ftbguilibrary-404465:3725485")
-    //runtimeOnly fg.deobf("curse.maven:ftbguilibrary-404465:3725485")
-    //compileOnly fg.deobf("curse.maven:itemfilters-309674:3725923")
-    //runtimeOnly fg.deobf("curse.maven:itemfilters-309674:3725923")
-    //compileOnly fg.deobf("curse.maven:ftbteams-forge-404468:3725501")
-    //runtimeOnly fg.deobf("curse.maven:ftbteams-forge-404468:3725501")
-    //compileOnly fg.deobf("curse.maven:architecturyforge-419699:3728618")
-    //runtimeOnly fg.deobf("curse.maven:architecturyforge-419699:3728618")
+  	compileOnly fg.deobf('local.maven:ftb-quests-forge:1902.4.2-build.116')
+  	compileOnly fg.deobf('local.maven:ftb-teams-forge:1902.2.9-build.61')
+  	compileOnly fg.deobf('local.maven:ftb-library-forge:1902.3.9-build.144')
+  	compileOnly fg.deobf('local.maven:item-filters-forge:1902.2.9-build.41')
+  	compileOnly fg.deobf('local.maven:architectury:6.2.46-forge')
 	
 	//compileOnly fg.deobf('com.matyrobbrt.mc.sectionprotection:sectionprotection-1.18.2-api:0.8.0')
 	// runtimeOnly fg.deobf('com.matyrobbrt.mc.sectionprotection:sectionprotection-1.18.2:0.8.0')
