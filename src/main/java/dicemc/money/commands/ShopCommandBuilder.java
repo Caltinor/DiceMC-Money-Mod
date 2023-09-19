@@ -27,7 +27,7 @@ public class ShopCommandBuilder implements Command<CommandSourceStack>{
 	
 	@Override
 	public int run(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-		context.getSource().sendSuccess(Component.literal("WIP"), true);
+		context.getSource().sendSuccess(() -> Component.literal("WIP"), true);
 		return 0;
 	}
 

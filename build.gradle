@@ -1,18 +1,8 @@
-buildscript {
-    repositories {
-        maven { url = 'https://files.minecraftforge.net/maven' }
-        jcenter()
-        mavenCentral()
-        maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
-    }
-    dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
-        classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
-    }
+plugins {
+    id 'net.neoforged.gradle' version '[6.0.18, 6.2)'
+    id 'org.parchmentmc.librarian.forgegradle' version '1.+'
+    id 'org.spongepowered.mixin' version '0.7.+'
 }
-apply plugin: 'net.minecraftforge.gradle'
-apply plugin: 'eclipse'
-apply plugin: 'maven-publish'
 
 repositories {
     maven {
@@ -21,15 +11,14 @@ repositories {
     flatDir { dirs 'libs' }
 }
 
-version = '1.19.2-0.0.2'
+version = '1.20.1-0.0.1'
 group = 'dicemc.money' 
 archivesBaseName = 'DiceMC Money'
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
-println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
 minecraft {
-    mappings channel: 'official', version: '1.19.2'
+    mappings channel: 'parchment', version: '2023.09.03-1.20.1'
 
     runs {
         client {
@@ -73,17 +62,19 @@ minecraft {
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.19.2-43.1.2'
+    minecraft 'net.neoforged:forge:1.20.1-47.1.76'
     //implementation files("C:/MinecraftModding/1-16-2/h2-1.4.200.jar") 
-    
-  	compileOnly fg.deobf('local.maven:ftb-quests-forge:1902.4.2-build.116')
-  	compileOnly fg.deobf('local.maven:ftb-teams-forge:1902.2.9-build.61')
-  	compileOnly fg.deobf('local.maven:ftb-library-forge:1902.3.9-build.144')
-  	compileOnly fg.deobf('local.maven:item-filters-forge:1902.2.9-build.41')
-  	compileOnly fg.deobf('local.maven:architectury:6.2.46-forge')
+
+    implementation fg.deobf("curse.maven:ftb-quests-forge-289412:4743499")
+    implementation fg.deobf("curse.maven:ftb-teams-forge-404468:4623116")
+    implementation fg.deobf("curse.maven:ftb-library-forge-404465:4720056")
+    implementation fg.deobf("curse.maven:item-filters-309674:4728209")
+    implementation fg.deobf("curse.maven:architectury-api-419699:4663010")
 	
 	//compileOnly fg.deobf('com.matyrobbrt.mc.sectionprotection:sectionprotection-1.18.2-api:0.8.0')
 	// runtimeOnly fg.deobf('com.matyrobbrt.mc.sectionprotection:sectionprotection-1.18.2:0.8.0')
+
+    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 }
 
 jar {
@@ -100,17 +91,4 @@ jar {
     }
 }
 
-jar.finalizedBy('reobfJar') 
-
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            artifact jar
-        }
-    }
-    repositories {
-        maven {
-            url "file:///${project.projectDir}/mcmodsrepo"
-        }
-    }
-}
+jar.finalizedBy('reobfJar')

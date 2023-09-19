@@ -1,5 +1,5 @@
 modLoader="javafml" #mandatory
-loaderVersion="[43,)" #mandatory
+loaderVersion="[47,)" #mandatory
 issueTrackerURL="https://github.com/caltinor" #optional
 displayURL="https://github.com/caltinor" #optional
 logoFile="" #optional
@@ -19,12 +19,12 @@ A server side money mod with sign-shops.
 [[dependencies.dicemcmm]] #optional
     modId="forge" #mandatory
     mandatory=true #mandatory
-    versionRange="[43.0.1,)" #mandatory
+    versionRange="[47,)" #mandatory
     ordering="NONE"
     side="BOTH"
 [[dependencies.dicemcmm]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.19.2,1.20)"
+    versionRange="[1.20.1,1.21)"
     ordering="NONE"
     side="BOTH"

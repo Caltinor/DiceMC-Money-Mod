@@ -20,8 +20,8 @@ public class MoneyReward extends Reward
 	public static RewardType MONEY_REWARD = FTBQHandler.MONEY_REWARD;
 	public double amount = 0;
 
-	public MoneyReward(Quest q) {
-		super(q);
+	public MoneyReward(long id, Quest q) {
+		super(id, q);
 	}
 	
 	@Override
@@ -62,9 +62,9 @@ public class MoneyReward extends Reward
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void getConfig( ConfigGroup config )
+    public void fillConfigGroup(ConfigGroup config)
     {
-        super.getConfig( config );
+        super.fillConfigGroup(config);
         config.addDouble( "amount", amount, input -> amount = input, 1d, 0d, Double.MAX_VALUE );
     }
     

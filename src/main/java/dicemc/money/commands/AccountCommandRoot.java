@@ -26,7 +26,7 @@ public class AccountCommandRoot implements Command<CommandSourceStack>{
 	public int run(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
 		ServerLevel world = context.getSource().getServer().overworld();		
 		Double balP = MoneyWSD.get(world).getBalance(AcctTypes.PLAYER.key, context.getSource().getEntityOrException().getUUID());
-		context.getSource().sendSuccess(Component.literal(Config.getFormattedCurrency(balP)), false);
+		context.getSource().sendSuccess(() -> Component.literal(Config.getFormattedCurrency(balP)), false);
 		return 0;
 	}
 	

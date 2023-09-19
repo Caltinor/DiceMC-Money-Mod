@@ -14,6 +14,9 @@ import dicemc.money.MoneyMod.AcctTypes;
 import dicemc.money.setup.Config;
 import dicemc.money.storage.DatabaseManager;
 import dicemc.money.storage.MoneyWSD;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.level.block.entity.SignText;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.WallSignBlock;
@@ -56,7 +59,7 @@ public class EventHandler {
 	@SuppressWarnings("resource")
 	@SubscribeEvent
 	public static void onPlayerLogin(PlayerLoggedInEvent event) {
-		if (!event.getEntity().getLevel().isClientSide && event.getEntity() instanceof ServerPlayer) {
+		if (!event.getEntity().level().isClientSide && event.getEntity() instanceof ServerPlayer) {
 			ServerPlayer player = (ServerPlayer) event.getEntity();
 			double balP = MoneyWSD.get(player.getServer().overworld()).getBalance(AcctTypes.PLAYER.key, player.getUUID());
 			player.sendSystemMessage(Component.literal(Config.getFormattedCurrency(balP)));
@@ -66,7 +69,7 @@ public class EventHandler {
 	@SuppressWarnings("resource")
 	@SubscribeEvent
 	public static void onPlayerDeath(LivingDeathEvent event) {
-		if (!event.getEntity().getLevel().isClientSide && event.getEntity() instanceof Player) {
+		if (!event.getEntity().level().isClientSide && event.getEntity() instanceof Player) {
 			Player player = (Player) event.getEntity();
 			double balp = MoneyWSD.get(player.getServer().overworld()).getBalance(AcctTypes.PLAYER.key, player.getUUID());
 			double loss = balp * Config.LOSS_ON_DEATH.get();
@@ -190,8 +193,8 @@ public class EventHandler {
 	}
 	
 	private static boolean activateShop(BlockEntity storage, SignBlockEntity tile, Level world, BlockPos pos, CompoundTag nbt, Player player) {
-		Component actionEntry = Component.Serializer.fromJson(nbt.getString("Text1"));
-		Component priceEntry  = Component.Serializer.fromJson(nbt.getString("Text4"));
+		Component actionEntry = tile.getFrontText().getMessage(0, true);
+		Component priceEntry  = tile.getFrontText().getMessage(3, true);
 		//check if the storage block has an item in the first slot
 		LazyOptional<IItemHandler> inv = storage.getCapability(ForgeCapabilities.ITEM_HANDLER, Direction.UP);
 		ItemStack srcStack = inv.map((c) -> {
@@ -221,8 +224,17 @@ public class EventHandler {
 			try {
 				double price = Math.abs(Double.valueOf(priceEntry.getString()));
 				tile.getPersistentData().putDouble("price", price);
-				tile.setMessage(0, Component.literal(actionEntry.getString()).withStyle(ChatFormatting.BLUE));
-				tile.setMessage(3, Component.literal(Config.getFormattedCurrency(price)).withStyle(ChatFormatting.GOLD));
+				tile.setText(new SignText(
+                        new Component[] {
+							Component.literal(actionEntry.getString()).withStyle(ChatFormatting.BLUE),
+							tile.getFrontText().getMessage(1, true),
+							tile.getFrontText().getMessage(2, true),
+							Component.literal(Config.getFormattedCurrency(price)).withStyle(ChatFormatting.GOLD)
+                        },
+						new Component[] { CommonComponents.EMPTY, CommonComponents.EMPTY, CommonComponents.EMPTY, CommonComponents.EMPTY },
+						DyeColor.BLACK,
+						false
+                ), true);
 				switch (actionEntry.getString().toLowerCase()) {
 				case "[buy]": {tile.getPersistentData().putString("shop-type", "buy"); break;}
 				case "[sell]": {tile.getPersistentData().putString("shop-type", "sell");break;}
@@ -300,7 +312,7 @@ public class EventHandler {
 		for (int l = 0; l < list.size(); l++) {
 			boolean hadMatch = false;
 			for (int i = 0; i < items.size(); i++) {
-				if (list.get(l).sameItem(items.get(i)) && ItemStack.tagMatches(list.get(l), items.get(i))) {
+				if (list.get(l).is(items.get(i).getItem()) && ItemStack.matches(list.get(l), items.get(i))) {
 					items.get(i).grow(list.get(l).getCount());
 					hadMatch = true;
 					break;
@@ -332,7 +344,7 @@ public class EventHandler {
 			keyStack.setCount(1);
 			boolean hasEntry = false;
 			for (Map.Entry<ItemStack, ItemStack> map : consolidatedItems.entrySet()) {
-				if (map.getKey().sameItem(srcStack) && ItemStack.tagMatches(map.getKey(), srcStack)) {
+				if (map.getKey().is(srcStack.getItem()) && ItemStack.matches(map.getKey(), srcStack)) {
 					map.getValue().grow(srcStack.getCount());
 					hasEntry = true;
 				}
@@ -360,12 +372,12 @@ public class EventHandler {
 				Optional<Boolean> test = inv.map((p) -> {
 					for (int i = 0; i < p.getSlots(); i++) {
 						ItemStack inSlot = ItemStack.EMPTY;
-						if (slotMap.containsKey(i) && transItems.get(t).getItem().equals(slotMap.get(i).getItem()) && ItemStack.tagMatches(transItems.get(t), slotMap.get(i))) {
+						if (slotMap.containsKey(i) && transItems.get(t).getItem().equals(slotMap.get(i).getItem()) && ItemStack.matches(transItems.get(t), slotMap.get(i))) {
 							inSlot = p.extractItem(i, stackSize[0]+slotMap.get(i).getCount(), true);
 							inSlot.shrink(slotMap.get(i).getCount());
 						}
 						else inSlot = p.extractItem(i, stackSize[0], true);
-						if (inSlot.getItem().equals(transItems.get(t).getItem()) && ItemStack.tagMatches(inSlot, transItems.get(t))) {
+						if (inSlot.getItem().equals(transItems.get(t).getItem()) && ItemStack.matches(inSlot, transItems.get(t))) {
 							slotMap.merge(i, inSlot, (s, o) -> {s.grow(o.getCount()); return s;});
 							stackSize[0] -= inSlot.getCount();
 						}						
@@ -420,11 +432,11 @@ public class EventHandler {
 					ItemStack inSlot = player.getInventory().getItem(i).copy();
 					int count = stackSize > inSlot.getCount() ? inSlot.getCount() : stackSize;
 					inSlot.setCount(count);
-					if (slotMap.containsKey(i) && transItems.get(t).getItem().equals(slotMap.get(i).getItem()) && ItemStack.tagMatches(transItems.get(t), slotMap.get(i))) {
+					if (slotMap.containsKey(i) && transItems.get(t).getItem().equals(slotMap.get(i).getItem()) && ItemStack.matches(transItems.get(t), slotMap.get(i))) {
 						count = stackSize+slotMap.get(i).getCount() > inSlot.getCount() ? inSlot.getCount() : stackSize+slotMap.get(i).getCount();
 						inSlot.setCount(count);
 					}
-					if (inSlot.getItem().equals(transItems.get(t).getItem()) && ItemStack.tagMatches(inSlot, transItems.get(t))) {
+					if (inSlot.getItem().equals(transItems.get(t).getItem()) && ItemStack.matches(inSlot, transItems.get(t))) {
 						slotMap.merge(i, inSlot, (s, o) -> {s.grow(o.getCount()); return s;});
 						stackSize -= inSlot.getCount();
 					}						
@@ -520,11 +532,11 @@ public class EventHandler {
 					ItemStack inSlot = player.getInventory().getItem(i).copy();
 					int count = stackSize > inSlot.getCount() ? inSlot.getCount() : stackSize;
 					inSlot.setCount(count);
-					if (slotMap.containsKey(i) && transItems.get(t).getItem().equals(slotMap.get(i).getItem()) && ItemStack.tagMatches(transItems.get(t), slotMap.get(i))) {
+					if (slotMap.containsKey(i) && transItems.get(t).getItem().equals(slotMap.get(i).getItem()) && ItemStack.matches(transItems.get(t), slotMap.get(i))) {
 						count = stackSize+slotMap.get(i).getCount() > inSlot.getCount() ? inSlot.getCount() : stackSize+slotMap.get(i).getCount();
 						inSlot.setCount(count);
 					}
-					if (inSlot.getItem().equals(transItems.get(t).getItem()) && ItemStack.tagMatches(inSlot, transItems.get(t))) {
+					if (inSlot.getItem().equals(transItems.get(t).getItem()) && ItemStack.matches(inSlot, transItems.get(t))) {
 						slotMap.merge(i, inSlot, (s, o) -> {s.grow(o.getCount()); return s;});
 						stackSize -= inSlot.getCount();
 					}						
