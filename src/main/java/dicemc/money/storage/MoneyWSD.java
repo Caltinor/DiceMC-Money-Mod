@@ -15,7 +15,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.saveddata.SavedData;
 
-public class MoneyWSD extends SavedData implements IMoneyManager{
+public class MoneyWSD extends SavedData implements IMoneyManager {
 	private static final String DATA_NAME = MoneyMod.MOD_ID + "_data";
 
 	public MoneyWSD(CompoundTag nbt) {this.load(nbt);}

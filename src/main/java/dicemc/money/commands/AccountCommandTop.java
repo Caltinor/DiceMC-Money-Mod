@@ -40,11 +40,12 @@ public class AccountCommandTop implements Command<CommandSourceStack>{
 		int limit = sorted.size() > Config.TOP_SIZE.get() ? Config.TOP_SIZE.get() : sorted.size();
 		
 		String tkey = limit == 1 ? "message.command.top1" : "message.command.top";
-		context.getSource().sendSuccess(Component.translatable(tkey, limit), false);
+		context.getSource().sendSuccess(() -> Component.translatable(tkey, limit), false);
 		for (int i = 0; i < limit; i++) {
 			Pair<UUID, Double> p = sorted.get(i);
 			String name = context.getSource().getServer().getProfileCache().get(p.getFirst()).get().getName();
-			context.getSource().sendSuccess(Component.literal("#"+(i+1)+" "+name+": "+Config.getFormattedCurrency(df, p.getSecond())), false);
+			int finalI = i;
+			context.getSource().sendSuccess(() -> Component.literal("#"+(finalI +1)+" "+name+": "+Config.getFormattedCurrency(df, p.getSecond())), false);
 		}
 		return 0;
 	}

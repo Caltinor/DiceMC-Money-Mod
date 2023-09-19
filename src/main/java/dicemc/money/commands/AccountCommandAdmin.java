@@ -72,10 +72,10 @@ public class AccountCommandAdmin{
 		//get the argument that is actually present
 		GameProfile player = null;
 		try {player = context.getSource().getServer().getProfileCache().get(StringArgumentType.getString(context, "player")).get();}
-		catch (IllegalArgumentException e) {}
+		catch (IllegalArgumentException ignored) {}
 		if (player == null) { try { 
 			player = EntityArgument.getPlayer(context, "player").getGameProfile();}
-			catch (IllegalArgumentException e) {}
+			catch (IllegalArgumentException ignored) {}
 		}
 		//rest of logic
 		MoneyWSD wsd = MoneyWSD.get(context.getSource().getServer().overworld());
@@ -100,8 +100,8 @@ public class AccountCommandAdmin{
 							, pid, AcctTypes.PLAYER.key, MoneyMod.dbm.server.getProfileCache().get(pid).get().getName()
 							, value, "Admin Set Command");
 				}
-				context.getSource().sendSuccess(
-					Component.translatable("message.command.set.success", player.getName(), Config.getFormattedCurrency(value)), true);
+				GameProfile finalPlayer = player;
+				context.getSource().sendSuccess(() -> Component.translatable("message.command.set.success", finalPlayer.getName(), Config.getFormattedCurrency(value)), true);
 				return 0;
 			}
 			context.getSource().sendFailure(Component.translatable("message.command.set.failure"));
@@ -119,8 +119,8 @@ public class AccountCommandAdmin{
 							, pid, AcctTypes.PLAYER.key, MoneyMod.dbm.server.getProfileCache().get(pid).get().getName()
 							, value, "Admin Give Command");
 				}
-				context.getSource().sendSuccess(
-					Component.translatable("message.command.give.success", Config.getFormattedCurrency(value), player.getName()), true);
+				GameProfile finalPlayer1 = player;
+				context.getSource().sendSuccess(() -> Component.translatable("message.command.give.success", Config.getFormattedCurrency(value), finalPlayer1.getName()), true);
 				return 0;
 			}
 			context.getSource().sendFailure(Component.translatable("message.command.change.failure"));
@@ -138,8 +138,8 @@ public class AccountCommandAdmin{
 							, pid, AcctTypes.PLAYER.key, MoneyMod.dbm.server.getProfileCache().get(pid).get().getName()
 							, value, "Admin Take Command");
 				}
-				context.getSource().sendSuccess(
-					Component.translatable("message.command.take.success", Config.getFormattedCurrency(value), player.getName()), true);
+				GameProfile finalPlayer2 = player;
+				context.getSource().sendSuccess(() -> Component.translatable("message.command.take.success", Config.getFormattedCurrency(value), finalPlayer2.getName()), true);
 				return 0;
 			}
 			context.getSource().sendFailure(Component.translatable("message.command.change.failure"));
@@ -165,7 +165,7 @@ public class AccountCommandAdmin{
 			return 1;
 		}
 		double balP = wsd.getBalance(AcctTypes.PLAYER.key, player.getId()); 
-		context.getSource().sendSuccess(Component.literal(Config.getFormattedCurrency(balP)), true);		
+		context.getSource().sendSuccess(() -> Component.literal(Config.getFormattedCurrency(balP)), true);
 		return 0;
 	}
 	
@@ -201,8 +201,8 @@ public class AccountCommandAdmin{
 				MoneyMod.dbm.postEntry(System.currentTimeMillis(), fromplayer.getId(), AcctTypes.PLAYER.key, fromplayer.getName()
 						, toplayer.getId(), AcctTypes.PLAYER.key, toplayer.getName(), value, "Admin Transfer Command Executed by: "+ srcName);
 			}
-			context.getSource().sendSuccess(
-				Component.translatable("message.command.transfer.success", Config.getFormattedCurrency(value), toplayer.getName()), true);
+			GameProfile finalToplayer = toplayer;
+			context.getSource().sendSuccess(() -> Component.translatable("message.command.transfer.success", Config.getFormattedCurrency(value), finalToplayer.getName()), true);
 			return 0;
 		}
 		context.getSource().sendFailure(Component.translatable("message.command.transfer.failure"));
