@@ -8,6 +8,7 @@ import dicemc.money.MoneyMod;
 import dicemc.money.MoneyMod.AcctTypes;
 import dicemc.money.api.IMoneyManager;
 import dicemc.money.setup.Config;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -18,7 +19,6 @@ import net.minecraft.world.level.saveddata.SavedData;
 public class MoneyWSD extends SavedData implements IMoneyManager {
 	private static final String DATA_NAME = MoneyMod.MOD_ID + "_data";
 
-	public MoneyWSD(CompoundTag nbt) {this.load(nbt);}
 	public MoneyWSD() {}
 	
 	private Map<ResourceLocation, Map<UUID, Double>> accounts = new HashMap<>();
@@ -83,11 +83,11 @@ public class MoneyWSD extends SavedData implements IMoneyManager {
 		}
 	}
 
-	public void load(CompoundTag nbt) {
+	public MoneyWSD(CompoundTag nbt, HolderLookup.Provider provider) {
 		ListTag baseList = nbt.getList("types", Tag.TAG_COMPOUND);
 		for (int b = 0; b < baseList.size(); b++) {
 			CompoundTag entry = baseList.getCompound(b);
-			ResourceLocation res = new ResourceLocation(entry.getString("type"));
+			ResourceLocation res = ResourceLocation.parse(entry.getString("type"));
 			Map<UUID, Double> data = new HashMap<>();
 			ListTag list = entry.getList("data", Tag.TAG_COMPOUND);
 			for (int i = 0; i < list.size(); i++) {
@@ -101,7 +101,7 @@ public class MoneyWSD extends SavedData implements IMoneyManager {
 	}
 
 	@Override
-	public CompoundTag save(CompoundTag nbt) {
+	public CompoundTag save(CompoundTag nbt, HolderLookup.Provider provider) {
 		ListTag baseList = new ListTag();
 		for (Map.Entry<ResourceLocation, Map<UUID, Double>> base : accounts.entrySet()) {
 			CompoundTag entry = new CompoundTag();
@@ -119,8 +119,12 @@ public class MoneyWSD extends SavedData implements IMoneyManager {
 		nbt.put("types", baseList);
 		return nbt;
 	}
+
+	public static Factory<MoneyWSD> dataFactory() {
+		return new SavedData.Factory<MoneyWSD>(MoneyWSD::new, MoneyWSD::new, null);
+	}
 	
 	public static MoneyWSD get(ServerLevel world) {
-		return world.getDataStorage().computeIfAbsent(MoneyWSD::new, MoneyWSD::new, DATA_NAME);
+		return world.getDataStorage().computeIfAbsent(dataFactory(), DATA_NAME);
 	}
 }

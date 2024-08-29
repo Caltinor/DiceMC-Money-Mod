@@ -7,13 +7,14 @@ import dev.ftb.mods.ftbquests.quest.reward.RewardType;
 import dicemc.money.MoneyMod.AcctTypes;
 import dicemc.money.setup.Config;
 import dicemc.money.storage.MoneyWSD;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 public class MoneyReward extends Reward
 {
@@ -33,28 +34,28 @@ public class MoneyReward extends Reward
 	}
 	
 	@Override
-    public void writeData( CompoundTag nbt )
+    public void writeData(CompoundTag nbt , HolderLookup.Provider provider)
     {
-        super.writeData( nbt );
+        super.writeData( nbt , provider);
         nbt.putDouble("amount", amount);
     }
 
     @Override
-    public void readData( CompoundTag nbt )
+    public void readData( CompoundTag nbt , HolderLookup.Provider provider)
     {
-        super.readData( nbt );
+        super.readData( nbt , provider);
         amount = nbt.getDouble("amount");
     }
 
     @Override
-    public void writeNetData( FriendlyByteBuf buffer )
+    public void writeNetData( RegistryFriendlyByteBuf buffer )
     {
         super.writeNetData(buffer );
         buffer.writeDouble( amount );
     }
 
     @Override
-    public void readNetData( FriendlyByteBuf buffer )
+    public void readNetData( RegistryFriendlyByteBuf buffer )
     {
         super.readNetData(buffer );
         amount = buffer.readDouble();

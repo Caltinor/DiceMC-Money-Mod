@@ -5,21 +5,19 @@ import dicemc.money.api.MoneyManager;
 import dicemc.money.commands.AccountCommandRoot;
 import dicemc.money.commands.AccountCommandTop;
 import dicemc.money.commands.ShopCommandBuilder;
-import dicemc.money.compat.SectionProtectionCompat;
 import dicemc.money.compat.ftbquests.FTBQHandler;
 import dicemc.money.setup.Config;
 import dicemc.money.storage.DatabaseManager;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.event.server.ServerStartingEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.ModList;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import org.slf4j.Logger;
 
 @Mod(MoneyMod.MOD_ID)
@@ -28,21 +26,13 @@ public class MoneyMod {
 	public static final Logger LOGGER = LogUtils.getLogger();
 	public static DatabaseManager dbm;
 	
-	public MoneyMod() {		
-		ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, Config.SERVER_CONFIG);		
-		
-		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::commonSetup);
+	public MoneyMod(IEventBus bus, ModContainer container) {
+		container.registerConfig(ModConfig.Type.SERVER, Config.SERVER_CONFIG);
 		
 		if (ModList.get().isLoaded( "ftbquests" ))
         	FTBQHandler.init();
-		if (ModList.get().isLoaded("sectionprotection"))
-			SectionProtectionCompat.init();
-		
-		MinecraftForge.EVENT_BUS.register(this);
-	}
-	
-	public void commonSetup(final FMLCommonSetupEvent event) {
 
+		NeoForge.EVENT_BUS.register(this);
 	}
 	
 	@SubscribeEvent 
@@ -50,7 +40,7 @@ public class MoneyMod {
 		MoneyManager.get().setWorld(event.getServer().overworld());
 		if (Config.ENABLE_HISTORY.get()) {
 			String worldname = getWorldName(event.getServer().getWorldData().getLevelName());
-			String urlIn = event.getServer().getServerDirectory().getAbsolutePath() + "\\saves\\" + worldname +"\\";
+			String urlIn = event.getServer().getServerDirectory().toAbsolutePath() + "\\saves\\" + worldname +"\\";
 			dbm = new DatabaseManager(worldname, urlIn);
 		}
 	}
@@ -64,9 +54,9 @@ public class MoneyMod {
 	
 	//This enum is just for the establishment of later types.
 	//Just forward thinking for expansion.
-	public static enum AcctTypes{
-		PLAYER(new ResourceLocation(MOD_ID, "player")),
-		SERVER(new ResourceLocation(MOD_ID, "server"));
+	public enum AcctTypes{
+		PLAYER(ResourceLocation.fromNamespaceAndPath(MOD_ID, "player")),
+		SERVER(ResourceLocation.fromNamespaceAndPath(MOD_ID, "server"));
 		
 		public ResourceLocation key;
 		
