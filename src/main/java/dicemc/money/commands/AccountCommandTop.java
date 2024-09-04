@@ -29,7 +29,7 @@ public class AccountCommandTop implements Command<CommandSourceStack>{
 	
 	@Override
 	public int run(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-		Map<UUID, Double> unsorted = MoneyWSD.get(context.getSource().getServer().overworld()).getAccountMap(AcctTypes.PLAYER.key);
+		Map<UUID, Double> unsorted = MoneyWSD.get().getAccountMap(AcctTypes.PLAYER.key);
 		List<Pair<UUID, Double>> sorted = new ArrayList<>();
 		DecimalFormat df = new DecimalFormat("###,###,###,##0.00");
 		

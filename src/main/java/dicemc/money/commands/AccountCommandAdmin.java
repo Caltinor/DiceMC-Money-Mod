@@ -78,7 +78,7 @@ public class AccountCommandAdmin{
 			catch (IllegalArgumentException ignored) {}
 		}
 		//rest of logic
-		MoneyWSD wsd = MoneyWSD.get(context.getSource().getServer().overworld());
+		MoneyWSD wsd = MoneyWSD.get();
 		String option = StringArgumentType.getString(context, "action");
 		//GameProfile player = EntityArgument.getPlayer(context, "player").getGameProfile();
 		UUID pid = player.getId();
@@ -159,7 +159,7 @@ public class AccountCommandAdmin{
 			catch (IllegalArgumentException e) {}
 		}
 		//rest of logic
-		MoneyWSD wsd = MoneyWSD.get(context.getSource().getServer().overworld());
+		MoneyWSD wsd = MoneyWSD.get();
 		if (player == null) {
 			context.getSource().sendFailure(Component.translatable("message.command.playernotfound"));
 			return 1;
@@ -182,7 +182,7 @@ public class AccountCommandAdmin{
 			catch (IllegalArgumentException e) {}
 		}
 		//rest of logic
-		MoneyWSD wsd = MoneyWSD.get(context.getSource().getServer().overworld());
+		MoneyWSD wsd = MoneyWSD.get();
 		double value = DoubleArgumentType.getDouble(context, "amount");
 		if (fromplayer == null) {
 			context.getSource().sendFailure(Component.translatable("message.command.playernotfound"));

@@ -1,11 +1,12 @@
 package dicemc.money.event;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -16,14 +17,11 @@ import dicemc.money.MoneyMod.AcctTypes;
 import dicemc.money.setup.Config;
 import dicemc.money.storage.DatabaseManager;
 import dicemc.money.storage.MoneyWSD;
-import net.minecraft.core.HolderGetter;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.CommonComponents;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.entity.SignText;
@@ -57,15 +55,19 @@ import net.neoforged.neoforge.event.level.BlockEvent;
 import net.neoforged.neoforge.items.IItemHandler;
 
 @EventBusSubscriber( modid=MoneyMod.MOD_ID, bus= EventBusSubscriber.Bus.GAME)
-public class EventHandler {		
-	public static Map<UUID, Long> timeSinceClick = new HashMap<>();
+public class EventHandler {
+	public static final String IS_SHOP = "is-shop";
+	public static final String ACTIVATED = "shop-activated";
+	public static final String OWNER = "owner";
+	public static final String ITEMS = "items";
+	public static final String TYPE = "shop-type";
+	public static final String PRICE = "price";
 
 	@SuppressWarnings("resource")
 	@SubscribeEvent
 	public static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
-		if (!event.getEntity().level().isClientSide && event.getEntity() instanceof ServerPlayer) {
-			ServerPlayer player = (ServerPlayer) event.getEntity();
-			double balP = MoneyWSD.get(player.getServer().overworld()).getBalance(AcctTypes.PLAYER.key, player.getUUID());
+		if (!event.getEntity().level().isClientSide && event.getEntity() instanceof ServerPlayer player) {
+			double balP = MoneyWSD.get().getBalance(AcctTypes.PLAYER.key, player.getUUID());
 			player.sendSystemMessage(Component.literal(Config.getFormattedCurrency(balP)));
 		}
 	}
@@ -73,12 +75,11 @@ public class EventHandler {
 	@SuppressWarnings("resource")
 	@SubscribeEvent
 	public static void onPlayerDeath(LivingDeathEvent event) {
-		if (!event.getEntity().level().isClientSide && event.getEntity() instanceof Player) {
-			Player player = (Player) event.getEntity();
-			double balp = MoneyWSD.get(player.getServer().overworld()).getBalance(AcctTypes.PLAYER.key, player.getUUID());
+		if (!event.getEntity().level().isClientSide && event.getEntity() instanceof Player player) {
+			double balp = MoneyWSD.get().getBalance(AcctTypes.PLAYER.key, player.getUUID());
 			double loss = balp * Config.LOSS_ON_DEATH.get();
 			if (loss > 0) {
-				MoneyWSD.get(player.getServer().overworld()).changeBalance(AcctTypes.PLAYER.key, player.getUUID(), -loss);
+				MoneyWSD.get().changeBalance(AcctTypes.PLAYER.key, player.getUUID(), -loss);
 				if (Config.ENABLE_HISTORY.get()) {
 					MoneyMod.dbm.postEntry(System.currentTimeMillis(), DatabaseManager.NIL, AcctTypes.SERVER.key, "Server"
 							, player.getUUID(), AcctTypes.PLAYER.key, player.getName().getString()
@@ -88,60 +89,39 @@ public class EventHandler {
 			}
 		}
 	}
-	
+
+	/**checks if the block being placed would border a shop sign and cancels the placement.
+	 */
 	@SubscribeEvent
 	public static void onBlockPlace(BlockEvent.EntityPlaceEvent event) {
-		if (event.getLevel().isClientSide()) return;
-		boolean cancel = false;
-		if (event.getLevel().getBlockEntity(event.getPos().north()) != null 
-				&&event.getLevel().getBlockEntity(event.getPos().north()).getPersistentData().contains("is-shop")) {
-			cancel = true;
-		}
-		if (event.getLevel().getBlockEntity(event.getPos().south()) != null
-				&& event.getLevel().getBlockEntity(event.getPos().south()).getPersistentData().contains("is-shop")) {
-			cancel = true;
-		}
-		if (event.getLevel().getBlockEntity(event.getPos().east()) != null 
-				&& event.getLevel().getBlockEntity(event.getPos().east()).getPersistentData().contains("is-shop")) {
-			cancel = true;
-		}
-		if (event.getLevel().getBlockEntity(event.getPos().west()) != null 
-				&& event.getLevel().getBlockEntity(event.getPos().west()).getPersistentData().contains("is-shop")) {
-			cancel = true;
-		}
-		if (event.getLevel().getBlockEntity(event.getPos().above()) != null 
-				&& event.getLevel().getBlockEntity(event.getPos().above()).getPersistentData().contains("is-shop")) {
-			cancel = true;
-		}
-		if (event.getLevel().getBlockEntity(event.getPos().below()) != null 
-				&& event.getLevel().getBlockEntity(event.getPos().below()).getPersistentData().contains("is-shop")) {
-			cancel = true;
-		}
+		if (event.getLevel().isClientSide() || event.isCanceled()) return;
+		boolean cancel = Arrays.stream(Direction.values()).anyMatch(direction ->
+				event.getLevel().getBlockEntity(event.getPos().relative(direction)) instanceof BlockEntity be
+				&& be.getPersistentData().contains(IS_SHOP));
 		event.setCanceled(cancel);
 	}
 
-	@SuppressWarnings("static-access")
 	@SubscribeEvent
 	public static void onShopBreak(BlockEvent.BreakEvent event) {
 		if (!event.getLevel().isClientSide() && event.getLevel().getBlockState(event.getPos()).getBlock() instanceof WallSignBlock) {
 			SignBlockEntity tile = (SignBlockEntity) event.getLevel().getBlockEntity(event.getPos());
 			CompoundTag nbt = tile.getPersistentData();
-			if (!nbt.isEmpty() && nbt.contains("shop-activated")) {
+			if (!nbt.isEmpty() && nbt.contains(ACTIVATED)) {
 				Player player = event.getPlayer();
 				boolean hasPerms = player.hasPermissions(Config.ADMIN_LEVEL.get());
-				if (!nbt.getUUID("owner").equals(player.getUUID())) {					
+				if (!nbt.getUUID(OWNER).equals(player.getUUID())) {
 					event.setCanceled(!hasPerms);					
 				}
-				else if(nbt.getUUID("owner").equals(player.getUUID()) || hasPerms) {
-					BlockPos backBlock = BlockPos.of(BlockPos.offset(event.getPos().asLong(), tile.getBlockState().getValue(((WallSignBlock)tile.getBlockState().getBlock()).FACING).getOpposite()));
-					event.getLevel().getBlockEntity(backBlock).getPersistentData().remove("is-shop");
+				else if(nbt.getUUID(OWNER).equals(player.getUUID()) || hasPerms) {
+					BlockPos backBlock = BlockPos.of(BlockPos.offset(event.getPos().asLong(), tile.getBlockState().getValue(WallSignBlock.FACING).getOpposite()));
+					event.getLevel().getBlockEntity(backBlock).getPersistentData().remove(IS_SHOP);
 				}
 			}
 		}
 		else if (!event.getLevel().isClientSide() && event.getLevel().getBlockEntity(event.getPos()) != null) {
 			IItemHandler inv = event.getLevel().getBlockEntity(event.getPos()).getLevel().getCapability(Capabilities.ItemHandler.BLOCK, event.getPos(), null);
 			if (inv != null) {
-				if (event.getLevel().getBlockEntity(event.getPos()).getPersistentData().contains("is-shop")) {
+				if (event.getLevel().getBlockEntity(event.getPos()).getPersistentData().contains(IS_SHOP)) {
 					Player player = event.getPlayer();
 					event.setCanceled(!player.hasPermissions(Config.ADMIN_LEVEL.get()));
 				}
@@ -154,8 +134,8 @@ public class EventHandler {
 		BlockEntity invTile = event.getLevel().getBlockEntity(event.getPos());
 		IItemHandler inv = event.getLevel().getCapability(Capabilities.ItemHandler.BLOCK, event.getPos(), null);
 		if (invTile != null && inv != null) {
-			if (invTile.getPersistentData().contains("is-shop")) {
-				if (!invTile.getPersistentData().getUUID("owner").equals(event.getEntity().getUUID())) {					
+			if (invTile.getPersistentData().contains(IS_SHOP)) {
+				if (!invTile.getPersistentData().getUUID(OWNER).equals(event.getEntity().getUUID())) {
 					event.setCanceled(!event.getEntity().hasPermissions(Config.ADMIN_LEVEL.get()));					
 				}
 			}
@@ -165,28 +145,25 @@ public class EventHandler {
 	@SuppressWarnings("resource")
 	@SubscribeEvent
 	public static void onSignLeftClick(PlayerInteractEvent.LeftClickBlock event) {
-		if (!event.getLevel().isClientSide && event.getLevel().getBlockState(event.getPos()).getBlock() instanceof WallSignBlock) {
+		if (!event.getLevel().isClientSide
+				&& event.getAction() == PlayerInteractEvent.LeftClickBlock.Action.START
+				&& event.getLevel().getBlockState(event.getPos()).getBlock() instanceof WallSignBlock) {
 			SignBlockEntity tile = (SignBlockEntity) event.getLevel().getBlockEntity(event.getPos());
 			CompoundTag nbt = tile.getPersistentData();
-			if (nbt.contains("shop-activated"))	
+			if (nbt.contains(ACTIVATED))
 				getSaleInfo(nbt, event.getEntity(), itemLookup(event.getLevel().registryAccess()));
 		}
 	}
-	
-	@SuppressWarnings({ "resource", "static-access" })
+
 	@SubscribeEvent
 	public static void onSignRightClick(PlayerInteractEvent.RightClickBlock event) {
 		if (!event.getLevel().isClientSide && event.getLevel().getBlockState(event.getPos()).getBlock() instanceof WallSignBlock) {
 			BlockState state = event.getLevel().getBlockState(event.getPos());
-			WallSignBlock sign = (WallSignBlock) state.getBlock();
-			BlockPos backBlock = BlockPos.of(BlockPos.offset(event.getPos().asLong(), state.getValue(sign.FACING).getOpposite()));
-			if (event.getLevel().getBlockEntity(backBlock) != null) {
-				BlockEntity invTile = event.getLevel().getBlockEntity(backBlock);
-				IItemHandler inv = event.getLevel().getCapability(Capabilities.ItemHandler.BLOCK, event.getPos(), null);
+			BlockPos backBlock = BlockPos.of(BlockPos.offset(event.getPos().asLong(), state.getValue(WallSignBlock.FACING).getOpposite()));
+			if (event.getLevel().getBlockEntity(backBlock) instanceof  BlockEntity invTile) {
 				SignBlockEntity tile = (SignBlockEntity) event.getLevel().getBlockEntity(event.getPos());
-				CompoundTag nbt = tile.saveWithFullMetadata(blockLookup(event.getLevel().registryAccess()));
-				if (!nbt.contains("ForgeData") || !nbt.getCompound("ForgeData").contains("shop-activated")) {
-					if (activateShop(invTile, tile, event.getLevel(), event.getPos(), nbt, event.getEntity()))
+				if (!tile.getPersistentData().contains(ACTIVATED)) {
+					if (activateShop(invTile, tile, event.getLevel(), event.getPos(), event.getEntity()))
 						event.setUseBlock(TriState.FALSE);
 				}
 				else {
@@ -197,83 +174,77 @@ public class EventHandler {
 		}
 	}
 	
-	private static boolean activateShop(BlockEntity storage, SignBlockEntity tile, Level world, BlockPos pos, CompoundTag nbt, Player player) {
+	private static boolean activateShop(BlockEntity storage, SignBlockEntity tile, Level world, BlockPos pos, Player player) {
 		HolderLookup.Provider provider = itemLookup(world.registryAccess());
 		Component actionEntry = tile.getFrontText().getMessage(0, true);
-		Component priceEntry  = tile.getFrontText().getMessage(3, true);
-		//check if the storage block has an item in the first slot
-		IItemHandler inv = world.getCapability(Capabilities.ItemHandler.BLOCK, storage.getBlockPos(), Direction.DOWN);
-		ItemStack srcStack = ItemStack.EMPTY;
-		for (int i = 0; i < inv.getSlots(); i++) {
-			if (inv.getStackInSlot(i).isEmpty()) continue;
-			srcStack = inv.getStackInSlot(i);
-			break;
+		double price = 0.0;
+		try {
+			price = Math.abs(Double.valueOf(tile.getFrontText().getMessage(3, true).getString()));
 		}
-		if (srcStack.equals(ItemStack.EMPTY)) return false;
+		catch(NumberFormatException e) {
+			player.sendSystemMessage(Component.translatable("message.activate.failure.money"));
+			world.destroyBlock(pos, true, player);
+			return false;
+		}
 		//first confirm the action type is valid
-		if (actionEntry.getString().equalsIgnoreCase("[buy]")
-				|| actionEntry.getString().equalsIgnoreCase("[sell]")
-				|| actionEntry.getString().equalsIgnoreCase("[server-buy]")
-				|| actionEntry.getString().equalsIgnoreCase("[server-sell]")) {
-			//second confirm the price value is valid
-			if (actionEntry.getString().equalsIgnoreCase("[server-buy]") || actionEntry.getString().equalsIgnoreCase("[server-sell]")) {
-				if (!player.hasPermissions(Config.ADMIN_LEVEL.get())) {
+		String shopString = switch (actionEntry.getString().toLowerCase()) {
+			case "[buy]" -> "buy";
+			case "[sell]" -> "sell";
+			case "[server-buy]", "[server-sell]" -> {
+				if (!player.hasPermissions(Config.ADMIN_LEVEL.get()) && !player.hasPermissions(Config.SHOP_LEVEL.get())) {
 					player.sendSystemMessage(Component.translatable("message.activate.failure.admin"));
-					return false;
+					yield actionEntry.getString().toLowerCase().replace("[","").replace("]","");
 				}
+				yield null;
 			}
-			else if (!player.hasPermissions(Config.SHOP_LEVEL.get())) {
-				player.sendSystemMessage(Component.translatable("message.activate.failure.admin"));
-				return false;
+			default ->  null;
+		};
+		if (shopString == null) return false;
+		//check if the storage block has an item in the inventory
+		IItemHandler inv = Arrays.stream(Direction.values()).map(direction -> {
+			IItemHandler invi = world.getCapability(Capabilities.ItemHandler.BLOCK, storage.getBlockPos(), direction);
+			for (int i = 0; i < invi.getSlots(); i++) {
+				if (!invi.getStackInSlot(i).isEmpty()) return invi;
 			}
-			try {
-				double price = Math.abs(Double.valueOf(priceEntry.getString()));
-				tile.getPersistentData().putDouble("price", price);
-				tile.setText(new SignText(
-                        new Component[] {
-							Component.literal(actionEntry.getString()).withStyle(ChatFormatting.BLUE),
-							tile.getFrontText().getMessage(1, true),
-							tile.getFrontText().getMessage(2, true),
-							Component.literal(Config.getFormattedCurrency(price)).withStyle(ChatFormatting.GOLD)
-                        },
-						new Component[] { CommonComponents.EMPTY, CommonComponents.EMPTY, CommonComponents.EMPTY, CommonComponents.EMPTY },
-						DyeColor.BLACK,
-						false
-                ), true);
-				switch (actionEntry.getString().toLowerCase()) {
-				case "[buy]": {tile.getPersistentData().putString("shop-type", "buy"); break;}
-				case "[sell]": {tile.getPersistentData().putString("shop-type", "sell");break;}
-				case "[server-buy]": {tile.getPersistentData().putString("shop-type", "server-buy");break;}
-				case "[server-sell]": {tile.getPersistentData().putString("shop-type", "server-sell");break;}
-				default:}
-				tile.getPersistentData().putBoolean("shop-activated", true);
-				tile.getPersistentData().putUUID("owner", player.getUUID());
-				//Serialize all items in the TE and store them in a ListNBT
-				ListTag lnbt = new ListTag();
-				for (int i = 0; i < inv.getSlots(); i++) {
-					ItemStack inSlot = inv.getStackInSlot(i);
-					if (inSlot.isEmpty()) continue;
-					if (inSlot.getItem() instanceof WritableBookItem)
-						lnbt.add(getItemFromBook(inSlot, itemLookup(player.level().registryAccess())));
-					else
-						lnbt.add(inSlot.save(provider));
-				}
-				tile.getPersistentData().put("items", lnbt);
-				tile.saveWithFullMetadata(provider);
-				tile.setChanged();
-				storage.getPersistentData().putBoolean("is-shop", true);
-				storage.getPersistentData().putUUID("owner", player.getUUID());
-				storage.saveWithFullMetadata(provider);
-				BlockState state = world.getBlockState(pos);
-				world.sendBlockUpdated(pos, state, state, Block.UPDATE_CLIENTS);
-				return true;
-			}
-			catch(NumberFormatException e) {
-				player.sendSystemMessage(Component.translatable("message.activate.failure.money"));
-				world.destroyBlock(pos, true, player);
-			}
+			return null;
+		}).filter(Objects::nonNull).findFirst().orElse(null);
+		if (inv == null) return false;
+
+		//store shop data on sign
+		tile.getPersistentData().putDouble(PRICE, price);
+		tile.setText(new SignText(
+				new Component[] {
+					Component.literal(actionEntry.getString()).withStyle(ChatFormatting.BLUE),
+					tile.getFrontText().getMessage(1, true),
+					tile.getFrontText().getMessage(2, true),
+					Component.literal(Config.getFormattedCurrency(price)).withStyle(ChatFormatting.GOLD)
+				},
+				new Component[] { CommonComponents.EMPTY, CommonComponents.EMPTY, CommonComponents.EMPTY, CommonComponents.EMPTY },
+				DyeColor.BLACK,
+				false
+		), true);
+		tile.getPersistentData().putString(TYPE, shopString);
+		tile.getPersistentData().putBoolean(ACTIVATED, true);
+		tile.getPersistentData().putUUID(OWNER, player.getUUID());
+		//Serialize all items in the TE and store them in a ListNBT
+		ListTag lnbt = new ListTag();
+		for (int i = 0; i < inv.getSlots(); i++) {
+			ItemStack inSlot = inv.getStackInSlot(i);
+			if (inSlot.isEmpty()) continue;
+			if (inSlot.getItem() instanceof WritableBookItem)
+				lnbt.add(getItemFromBook(inSlot, itemLookup(player.level().registryAccess())));
+			else
+				lnbt.add(inSlot.save(provider));
 		}
-		return false;
+		tile.getPersistentData().put(ITEMS, lnbt);
+		tile.saveWithFullMetadata(provider);
+		tile.setChanged();
+		storage.getPersistentData().putBoolean(IS_SHOP, true);
+		storage.getPersistentData().putUUID(OWNER, player.getUUID());
+		storage.saveWithFullMetadata(provider);
+		BlockState state = world.getBlockState(pos);
+		world.sendBlockUpdated(pos, state, state, Block.UPDATE_CLIENTS);
+		return true;
 	}
 	
 	private static CompoundTag getItemFromBook(ItemStack stack, HolderLookup.Provider provider) {
@@ -291,21 +262,19 @@ public class EventHandler {
 	}
 	
 	private static void getSaleInfo(CompoundTag nbt, Player player, HolderLookup.Provider provider) {
-		if (System.currentTimeMillis() - timeSinceClick.getOrDefault(player.getUUID(), 0l) < 1500) return;
-		String type = nbt.getString("shop-type");
+		String type = nbt.getString(TYPE);
 		boolean isBuy = type.equalsIgnoreCase("buy") || type.equalsIgnoreCase("server-buy");
 		List<ItemStack> transItems = new ArrayList<>();
-		ListTag itemsList = nbt.getList("items", Tag.TAG_COMPOUND);
+		ListTag itemsList = nbt.getList(ITEMS, Tag.TAG_COMPOUND);
 		for (int i = 0; i < itemsList.size(); i++) {
 			transItems.add(ItemStack.parse(provider, itemsList.getCompound(i)).orElse(new ItemStack(Items.AIR)));
 		}
-		double value = nbt.getDouble("price");
+		double value = nbt.getDouble(PRICE);
 		MutableComponent itemComponent = getTransItemsDisplayString(transItems);
 		if (isBuy)
 			player.sendSystemMessage(Component.translatable("message.shop.info", itemComponent, Config.getFormattedCurrency(value)));
 		else
 			player.sendSystemMessage(Component.translatable("message.shop.info", Config.getFormattedCurrency(value), itemComponent));
-		timeSinceClick.put(player.getUUID(), System.currentTimeMillis());
 	}
 	
 	private static MutableComponent getTransItemsDisplayString(List<ItemStack> list ) {
@@ -333,12 +302,12 @@ public class EventHandler {
 	}
 	
 	private static void processTransaction(BlockEntity tile, SignBlockEntity sign, Player player) {
-		MoneyWSD wsd = MoneyWSD.get(player.getServer().overworld());
+		MoneyWSD wsd = MoneyWSD.get();
 		CompoundTag nbt = sign.getPersistentData();
 		IItemHandler inv = player.level().getCapability(Capabilities.ItemHandler.BLOCK, tile.getBlockPos(), null);
 		List<ItemStack> transItems = new ArrayList<>();
 		Map<ItemStack, ItemStack> consolidatedItems = new HashMap<>();
-		ListTag itemsList = nbt.getList("items", Tag.TAG_COMPOUND);
+		ListTag itemsList = nbt.getList(ITEMS, Tag.TAG_COMPOUND);
 		for (int i = 0; i < itemsList.size(); i++) {
 			ItemStack srcStack = ItemStack.parse(itemLookup(player.level().registryAccess()), itemsList.getCompound(i)).orElse(new ItemStack(Items.AIR));
 			ItemStack keyStack = srcStack.copy();
@@ -356,8 +325,8 @@ public class EventHandler {
 			transItems.add(map.getValue());
 		}
 		//ItemStack transItem = ItemStack.of(nbt.getCompound("item"));
-		String action = nbt.getString("shop-type");
-		double value = nbt.getDouble("price");
+		String action = nbt.getString(TYPE);
+		double value = nbt.getDouble(PRICE);
 		//================BUY=================================================================================
 		if (action.equalsIgnoreCase("buy")) { //BUY
 			//First check the available funds and stock for trade
@@ -392,7 +361,7 @@ public class EventHandler {
 			}
 			//Test if container has inventory to process.
 			//If so, process transfer of items and funds.			
-			UUID shopOwner = nbt.getUUID("owner");
+			UUID shopOwner = nbt.getUUID(OWNER);
 			wsd.transferFunds(AcctTypes.PLAYER.key, player.getUUID(), AcctTypes.PLAYER.key, shopOwner, value);
 			if (Config.ENABLE_HISTORY.get()) {
 				String itemPrint = "";
@@ -415,7 +384,7 @@ public class EventHandler {
 		//================SELL=================================================================================
 		else if (action.equalsIgnoreCase("sell")) { //SELL
 			//First check the available funds and stock for trade
-			UUID shopOwner = nbt.getUUID("owner");
+			UUID shopOwner = nbt.getUUID(OWNER);
 			double balP = wsd.getBalance(AcctTypes.PLAYER.key, shopOwner);
 			if (value > balP) {
 				player.sendSystemMessage(Component.translatable("message.shop.sell.failure.funds"));

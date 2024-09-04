@@ -37,7 +37,6 @@ public class MoneyMod {
 	
 	@SubscribeEvent 
 	public void onServerStart(ServerStartingEvent event ) {
-		MoneyManager.get().setWorld(event.getServer().overworld());
 		if (Config.ENABLE_HISTORY.get()) {
 			String worldname = getWorldName(event.getServer().getWorldData().getLevelName());
 			String urlIn = event.getServer().getServerDirectory().toAbsolutePath() + "\\saves\\" + worldname +"\\";

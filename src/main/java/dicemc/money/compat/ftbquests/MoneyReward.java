@@ -30,7 +30,7 @@ public class MoneyReward extends Reward
 
 	@Override
 	public void claim(ServerPlayer player, boolean bool) {
-		MoneyWSD.get(player.getServer().overworld()).changeBalance(AcctTypes.PLAYER.key, player.getUUID(), amount);		
+		MoneyWSD.get().changeBalance(AcctTypes.PLAYER.key, player.getUUID(), amount);
 	}
 	
 	@Override

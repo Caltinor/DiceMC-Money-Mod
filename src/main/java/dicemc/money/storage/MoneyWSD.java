@@ -15,6 +15,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.saveddata.SavedData;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 public class MoneyWSD extends SavedData implements IMoneyManager {
 	private static final String DATA_NAME = MoneyMod.MOD_ID + "_data";
@@ -124,7 +125,10 @@ public class MoneyWSD extends SavedData implements IMoneyManager {
 		return new SavedData.Factory<MoneyWSD>(MoneyWSD::new, MoneyWSD::new, null);
 	}
 	
-	public static MoneyWSD get(ServerLevel world) {
-		return world.getDataStorage().computeIfAbsent(dataFactory(), DATA_NAME);
+	public static MoneyWSD get() {
+		if (ServerLifecycleHooks.getCurrentServer() != null)
+			return ServerLifecycleHooks.getCurrentServer().overworld().getDataStorage().computeIfAbsent(dataFactory(), DATA_NAME);
+		else
+			return new MoneyWSD();
 	}
 }

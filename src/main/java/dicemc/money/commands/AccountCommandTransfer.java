@@ -34,10 +34,9 @@ private static final AccountCommandTransfer CMD = new AccountCommandTransfer();
 	@Override
 	public int run(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
 		ServerPlayer player = context.getSource().getPlayerOrException();
-		ServerLevel world = context.getSource().getServer().overworld();
 		double value = DoubleArgumentType.getDouble(context, "value");
 		UUID recipient = context.getSource().getServer().getProfileCache().get(StringArgumentType.getString(context, "recipient")).get().getId();
-		if (MoneyWSD.get(world).transferFunds(AcctTypes.PLAYER.key, player.getUUID(), AcctTypes.PLAYER.key, recipient, value)) {
+		if (MoneyWSD.get().transferFunds(AcctTypes.PLAYER.key, player.getUUID(), AcctTypes.PLAYER.key, recipient, value)) {
 			if (Config.ENABLE_HISTORY.get()) {
 				MoneyMod.dbm.postEntry(System.currentTimeMillis(), player.getUUID(), AcctTypes.PLAYER.key, player.getName().getString()
 						, recipient, AcctTypes.PLAYER.key, context.getSource().getServer().getProfileCache().get(recipient).get().getName()
