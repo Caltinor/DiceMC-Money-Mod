@@ -157,8 +157,8 @@ public class EventHandler {
 
 	@SubscribeEvent
 	public static void onSignRightClick(PlayerInteractEvent.RightClickBlock event) {
-		if (!event.getLevel().isClientSide && event.getLevel().getBlockState(event.getPos()).getBlock() instanceof WallSignBlock) {
-			BlockState state = event.getLevel().getBlockState(event.getPos());
+		BlockState state = event.getLevel().getBlockState(event.getPos());
+		if (!event.getLevel().isClientSide && state.getBlock() instanceof WallSignBlock) {
 			BlockPos backBlock = BlockPos.of(BlockPos.offset(event.getPos().asLong(), state.getValue(WallSignBlock.FACING).getOpposite()));
 			if (event.getLevel().getBlockEntity(backBlock) instanceof  BlockEntity invTile) {
 				SignBlockEntity tile = (SignBlockEntity) event.getLevel().getBlockEntity(event.getPos());
@@ -188,14 +188,14 @@ public class EventHandler {
 		}
 		//first confirm the action type is valid
 		String shopString = switch (actionEntry.getString().toLowerCase()) {
-			case "[buy]" -> "buy";
-			case "[sell]" -> "sell";
+			case "[buy]" -> player.hasPermissions(Config.SHOP_LEVEL.get()) ? "buy" : null;
+			case "[sell]" -> player.hasPermissions(Config.SHOP_LEVEL.get()) ? "sell": null;
 			case "[server-buy]", "[server-sell]" -> {
-				if (!player.hasPermissions(Config.ADMIN_LEVEL.get()) && !player.hasPermissions(Config.SHOP_LEVEL.get())) {
+				if (!player.hasPermissions(Config.ADMIN_LEVEL.get())) {
 					player.sendSystemMessage(Component.translatable("message.activate.failure.admin"));
-					yield actionEntry.getString().toLowerCase().replace("[","").replace("]","");
+					yield null;
 				}
-				yield null;
+				yield actionEntry.getString().toLowerCase().replace("[","").replace("]","");
 			}
 			default ->  null;
 		};
@@ -534,9 +534,5 @@ public class EventHandler {
 
 	public static HolderLookup.Provider itemLookup(RegistryAccess access) {
 		return HolderLookup.Provider.create(Stream.of(access.lookupOrThrow(Registries.ITEM)));
-	}
-
-	public static HolderLookup.Provider blockLookup(RegistryAccess access) {
-		return HolderLookup.Provider.create(Stream.of(access.lookupOrThrow(Registries.BLOCK)));
 	}
 }
