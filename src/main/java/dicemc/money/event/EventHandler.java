@@ -213,13 +213,13 @@ public class EventHandler {
 		//store shop data on sign
 		tile.getPersistentData().putDouble(PRICE, price);
 		tile.setText(new SignText(
+				new Component[] { CommonComponents.EMPTY, CommonComponents.EMPTY, CommonComponents.EMPTY, CommonComponents.EMPTY },
 				new Component[] {
 					Component.literal(actionEntry.getString()).withStyle(ChatFormatting.BLUE),
 					tile.getFrontText().getMessage(1, true),
 					tile.getFrontText().getMessage(2, true),
 					Component.literal(Config.getFormattedCurrency(price)).withStyle(ChatFormatting.GOLD)
 				},
-				new Component[] { CommonComponents.EMPTY, CommonComponents.EMPTY, CommonComponents.EMPTY, CommonComponents.EMPTY },
 				DyeColor.BLACK,
 				false
 		), true);
