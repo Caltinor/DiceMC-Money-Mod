@@ -8,11 +8,11 @@ import dicemc.money.MoneyMod.AcctTypes;
 import dicemc.money.setup.Config;
 import dicemc.money.storage.MoneyWSD;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
@@ -44,7 +44,7 @@ public class MoneyReward extends Reward
     public void readData( CompoundTag nbt , HolderLookup.Provider provider)
     {
         super.readData( nbt , provider);
-        amount = nbt.getDouble("amount");
+        amount = nbt.getDouble("amount").orElse(0.0);
     }
 
     @Override
@@ -72,7 +72,7 @@ public class MoneyReward extends Reward
     @Override
     public MutableComponent getAltTitle()
     {
-        return Component.translatable("ftbquests.reward.dicemcmm.moneyreward").append(" "+Config.CURRENCY_SYMBOL.get()+String.valueOf(amount));
+        return Component.translatable("ftbquests.reward.dicemcmm.moneyreward").append(" "+Config.CURRENCY_SYMBOL.get()+ amount);
     }
 
 }

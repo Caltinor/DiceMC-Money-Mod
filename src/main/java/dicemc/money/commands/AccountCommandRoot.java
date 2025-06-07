@@ -10,7 +10,6 @@ import dicemc.money.storage.MoneyWSD;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerLevel;
 
 public class AccountCommandRoot implements Command<CommandSourceStack>{
 	private static final AccountCommandRoot CMD = new AccountCommandRoot();
