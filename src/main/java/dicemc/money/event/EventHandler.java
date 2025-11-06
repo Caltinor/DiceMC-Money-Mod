@@ -241,7 +241,8 @@ public class EventHandler {
 				Component.literal(Config.getFormattedCurrency(price)).withStyle(ChatFormatting.GOLD)
 		};
 
-		tile.setText(new SignText(signText, signText, DyeColor.BLACK, false), true);
+		SignText newFront = new SignText(signLines, tile.getFrontText().getMessages(true), DyeColor.BLACK, false); // edited
+		tile.setText(newFront, true); //edited
 		tile.getPersistentData().putString(TYPE, shopString);
 		tile.getPersistentData().putBoolean(ACTIVATED, true);
 		tile.getPersistentData().putUUID(OWNER, player.getUUID());
